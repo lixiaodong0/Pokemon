@@ -1,8 +1,8 @@
 package com.lixd.pokemon.network.retrofit
 
 import com.lixd.pokemon.network.interceptor.httpLoggingInterceptor
+import com.lixd.pokemon.network.service.BASE_URL
 import com.lixd.pokemon.network.service.PokemonService
-import okhttp3.OkHttp
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -21,7 +21,7 @@ object RetrofitProvider {
     private val retrofit: Retrofit by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
         Retrofit.Builder()
             .client(okHttpClient)
-            .baseUrl("https://pokeapi.co/")
+            .baseUrl(BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
     }

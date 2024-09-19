@@ -11,4 +11,19 @@ data class SpritesBean(
     val frontDefault: String,
     @SerializedName("front_shiny")
     val frontShiny: String,
+    @SerializedName("other")
+    val other: OtherSpritesBean,
+)
+
+data class OtherSpritesBean(
+    //官方图
+    @SerializedName("official-artwork")
+    val officialArtwork: OfficialArtwork,
+)
+
+data class OfficialArtwork(
+    @SerializedName("front_default")
+    val frontDefault: String,
+    @SerializedName("front_shiny")
+    val frontShiny: String,
 )
