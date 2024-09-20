@@ -111,7 +111,9 @@ fun RightContent(modifier: Modifier, data: PokemonBean?) {
             AsyncImage(
                 model = image,
                 contentDescription = null,
-                modifier = Modifier.fillMaxSize()
+                contentScale = ContentScale.Inside,
+                modifier = Modifier.fillMaxSize(),
+
             )
         }
     }
