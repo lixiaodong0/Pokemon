@@ -34,7 +34,7 @@ class HomeViewModel(
         }
     }
 
-    fun getPokemon(id: String = "1") {
+    fun getPokemon(id: Int = 1) {
         Log.d("lixd", "[getPokemon]onStart")
         viewStatus.update { it.copy(isLoading = true) }
         viewModelScope.launch(Dispatchers.IO) {

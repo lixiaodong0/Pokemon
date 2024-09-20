@@ -13,12 +13,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.center
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -26,8 +30,50 @@ import com.lixd.pokemon.ui.widget.PokemonAttributeWidget
 import okhttp3.internal.wait
 
 @Composable
-fun PokemonInfoCardContainer() {
-
+fun PokemonInfoCardContainer(
+    nameValue: String,
+    heightValue: String,
+    weightValue: String,
+    attributeValue: List<String>,
+    killExperienceValue: String,
+) {
+    Surface(color = Color.Transparent, shadowElevation = 4.dp) {
+        Column {
+            NameInfoItem("名称", nameValue)
+            Spacer(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(1.dp)
+                    .background(Color(0XFFefefef))
+            )
+            val primaryAttrName = attributeValue.first()
+            val secondaryAttrName = if (attributeValue.size >= 2) attributeValue[1] else ""
+            AttributeInfoItem(
+                primaryAttrName = primaryAttrName,
+                secondaryAttrName = secondaryAttrName
+            )
+            Spacer(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(1.dp)
+                    .background(Color(0XFFefefef))
+            )
+            NameInfoItem("身高", "${heightValue}m")
+            Spacer(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(1.dp)
+                    .background(Color(0XFFefefef))
+            )
+            NameInfoItem("体重", "${weightValue}kg")
+            Spacer(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(4.dp)
+            )
+            NameInfoItem("获得经验值", killExperienceValue)
+        }
+    }
 }
 
 
@@ -97,15 +143,15 @@ fun BasicInfoItem(
     ) {
         Box(
             modifier = Modifier
-                .weight(1f)
+                .weight(0.45f)
                 .fillMaxHeight()
-                .background(Color.Gray),
+                .background(Color(0xffdbdcd7)),
         ) {
             leftContent()
         }
         Box(
             modifier = Modifier
-                .weight(1f)
+                .weight(0.55f)
                 .fillMaxHeight()
                 .background(Color.White),
         ) {
@@ -114,11 +160,9 @@ fun BasicInfoItem(
     }
 }
 
+
 @Preview
 @Composable
-fun BasicInfoItemPreview() {
-    Column {
-        NameInfoItem("名称", "水军")
-        AttributeInfoItem(primaryAttrName = "飞行", secondaryAttrName = "草")
-    }
+fun PokemonInfoCardContainerPreview() {
+//    PokemonInfoCardContainer()
 }

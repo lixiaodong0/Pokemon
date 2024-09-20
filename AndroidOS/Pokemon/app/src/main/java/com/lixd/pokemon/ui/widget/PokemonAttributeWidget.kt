@@ -2,6 +2,7 @@ package com.lixd.pokemon.ui.widget
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
@@ -25,11 +26,11 @@ fun PokemonAttributeWidget(
     modifier: Modifier = Modifier,
     attrIcon: String,
     attrName: String,
-    attrIconBackgroundColor: Color = Color.Yellow,
-    attrNameBackgroundColor: Color = Color.Black,
+    attrIconBackgroundColor: Color = Color(0xff5893d2),
+    attrNameBackgroundColor: Color = Color(0xff424f58),
 ) {
     val iconSize = 20.dp
-    Surface(modifier = modifier, shape = RoundedCornerShape(8.dp), color = Color.Transparent) {
+    Surface(modifier = modifier, shape = RoundedCornerShape(2.dp), color = Color.Transparent) {
         Row(modifier = Modifier.drawBehind {
             drawRect(attrNameBackgroundColor)
             val path = Path().apply {
@@ -52,7 +53,6 @@ fun PokemonAttributeWidget(
             )
         }
     }
-
 }
 
 @Preview
@@ -62,6 +62,7 @@ fun PokemonAttributeWidgetPreview() {
         Surface(modifier = Modifier.weight(1f), color = Color.Transparent) {
             PokemonAttributeWidget(attrIcon = "", attrName = "飞行")
         }
+        Spacer(modifier = Modifier.size(8.dp))
         Surface(modifier = Modifier.weight(1f), color = Color.Transparent) {
             PokemonAttributeWidget(attrIcon = "", attrName = "草")
         }

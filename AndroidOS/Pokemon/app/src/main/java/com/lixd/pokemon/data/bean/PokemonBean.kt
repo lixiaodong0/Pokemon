@@ -7,6 +7,8 @@ data class PokemonBean(
     val id: String,
     @SerializedName("name")
     val name: String,
+    @SerializedName("base_experience")
+    val baseExperience: String,
     @SerializedName("height")
     val height: String,
     @SerializedName("weight")
@@ -14,7 +16,9 @@ data class PokemonBean(
     @SerializedName("stats")
     val stats: List<StatsBean>,
     @SerializedName("abilities")
-    val abilities: List<AbilitiesBean>,
+    val abilities: List<AbilitiesBean>?,
     @SerializedName("sprites")
     val sprites: SpritesBean,
+    @SerializedName("types")
+    val types: List<TypesBean>?,
 )

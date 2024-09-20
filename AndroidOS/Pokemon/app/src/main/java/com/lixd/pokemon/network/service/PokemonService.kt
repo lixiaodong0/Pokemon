@@ -24,5 +24,5 @@ interface PokemonService {
      * @param id 宝可梦ID
      */
     @GET("api/v2/pokemon/{id}")
-    suspend fun getPokemon(@Path("id") id: String): PokemonBean
+    suspend fun getPokemon(@Path("id") id: Int): PokemonBean
 }

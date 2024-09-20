@@ -11,7 +11,7 @@ class PokemonRepository(private val pokemonService: PokemonService) {
         return pokemonService.getPokemonList(url)
     }
 
-    suspend fun getPokemon(id: String): PokemonBean {
+    suspend fun getPokemon(id: Int): PokemonBean {
         return pokemonService.getPokemon(id)
     }
 }
