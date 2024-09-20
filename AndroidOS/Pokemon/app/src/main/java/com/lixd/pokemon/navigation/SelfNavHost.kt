@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.lixd.pokemon.ui.desc.PokemonDescriptionScreen
 import com.lixd.pokemon.ui.home.HomeScreen
 import com.lixd.pokemon.ui.pokemon.PokemonIndexScreen
 
@@ -15,6 +16,9 @@ fun SelfNavHost(navController: NavHostController) {
         }
         composable(PokemonIndexRoute) {
             PokemonIndexScreen()
+        }
+        composable(PokemonDescriptionRoute) {
+            PokemonDescriptionScreen()
         }
         composable(PropsRoute) {
 

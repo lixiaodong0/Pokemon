@@ -14,11 +14,14 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
@@ -148,12 +151,14 @@ fun PokemonIndexItem(
             .heightIn(avatarSize)
             .clickable(onClick = onClick)
     ) {
-        Card(
+        Surface(
             modifier = Modifier
                 .padding(start = avatarSize + arrowSize / 2)
                 .align(Alignment.Center),
-            colors = CardDefaults.cardColors(containerColor = Color.Transparent),
-            elevation = CardDefaults.cardElevation(defaultElevation = defaultElevation)
+            shape = RoundedCornerShape(avatarSize),
+            color = Color.Transparent,
+            contentColor = Color.Transparent,
+            shadowElevation = defaultElevation
         ) {
             Row(modifier = Modifier
                 .fillMaxWidth()
@@ -171,8 +176,6 @@ fun PokemonIndexItem(
                             close()
                         }
                         drawPath(path, Color(0xff000200))
-                    } else {
-                        drawRect(Color.Transparent)
                     }
                 }
                 .padding(vertical = 4.dp)
