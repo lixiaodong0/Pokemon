@@ -9,14 +9,22 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextLayoutResult
+import androidx.compose.ui.text.TextMeasurer
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.toSize
 import java.lang.Math.toRadians
 import kotlin.math.cos
 import kotlin.math.min
@@ -30,7 +38,7 @@ fun PokemonStatsWidget(count: Int = 6, data: List<DrawData> = mutableListOf()) {
         val rectSize = 200.dp
         Canvas(modifier = Modifier.size(rectSize)) {
             //半径
-            val radius = min(size.width, size.height) / 2f
+            val radius = (min(size.width, size.height) * 0.5f / 2f)
             //每次画多少角度
             val angle = 360f / count
             //起始角度
@@ -40,7 +48,13 @@ fun PokemonStatsWidget(count: Int = 6, data: List<DrawData> = mutableListOf()) {
             val drawData = mutableListOf<DrawArcPoints>()
             for (i in 0 until count) {
                 val points = calculateArcPoints(center.x, center.y, radius, startAngle, angle)
-                drawData.add(DrawArcPoints(Offset(center.x, center.y), points.first, points.second))
+                drawData.add(
+                    DrawArcPoints(
+                        Offset(center.x, center.y),
+                        points.first,
+                        points.second
+                    ),
+                )
                 startAngle += angle
             }
             //绘制三角区域
@@ -51,13 +65,100 @@ fun PokemonStatsWidget(count: Int = 6, data: List<DrawData> = mutableListOf()) {
             drawData.forEach {
                 drawLine(Color.White, it.center, it.sweepAngle, strokeWidth = 2f)
             }
+
             //绘制文字
             drawData.forEachIndexed { index, drawArcPoints ->
-                val topLeft = Offset(drawArcPoints.startAngle.x, drawArcPoints.startAngle.y)
-                drawText(textMeasurer, data[index].key, topLeft = topLeft)
+                val center = Offset(drawArcPoints.startAngle.x, drawArcPoints.startAngle.y)
+                //先测量文本的最大宽度，得到最大宽度可以设置constraints属性来保证文字的居中
+                val maxWidth = measureTextMaxWidth(textMeasurer, mutableListOf(data[index].key,data[index].value),12.sp)
+                val keyText = textMeasurer.measure(
+                    data[index].key,
+                    style = TextStyle(
+                        fontSize = 12.sp,
+                        color = Color.Black,
+                        textAlign = TextAlign.Center
+                    ),
+                    constraints = Constraints(maxWidth.toInt())
+                )
+                val valueText = textMeasurer.measure(
+                    data[index].value,
+                    style = TextStyle(
+                        fontSize = 12.sp,
+                        color = Color.Black,
+                        textAlign = TextAlign.Center
+                    ),
+                    constraints = Constraints(maxWidth.toInt())
+                )
+
+
+                val maxHeight =
+                    (keyText.size.height + valueText.size.height).toFloat()
+                val horizontalMargin = 8.dp.toPx()
+                val verticalMargin = horizontalMargin / 2
+                when (index) {
+                    //最右边两个
+                    0, 5 -> {
+                        val keyTopLeft = center.minus(Offset(-horizontalMargin, maxHeight / 2))
+                        drawRect(
+                            Color.White,
+                            topLeft = keyTopLeft,
+                            size = Size(maxWidth, maxHeight),
+                        )
+                        drawText(keyText, topLeft = keyTopLeft)
+                        val valueTopLeft =
+                            keyTopLeft.plus(Offset(0f, keyText.size.height.toFloat()))
+                        drawText(valueText, topLeft = valueTopLeft)
+                    }
+                    //上下两个
+                    1, 4 -> {
+                        val keyTopLeft = if (index == 1) {
+                            center.minus(Offset(maxWidth / 2, -verticalMargin))
+                        } else {
+                            center.minus(Offset(maxWidth / 2, maxHeight + verticalMargin))
+                        }
+                        drawRect(
+                            Color.White,
+                            topLeft = keyTopLeft,
+                            size = Size(maxWidth, maxHeight),
+                        )
+                        drawText(keyText, topLeft = keyTopLeft)
+                        val valueTopLeft =
+                            keyTopLeft.plus(Offset(0f, keyText.size.height.toFloat()))
+                        drawText(valueText, topLeft = valueTopLeft)
+                    }
+                    //最左边两个
+                    2, 3 -> {
+                        val keyTopLeft =
+                            center.minus(Offset(maxWidth + horizontalMargin, maxHeight / 2))
+                        drawRect(
+                            Color.White,
+                            topLeft = keyTopLeft,
+                            size = Size(maxWidth, maxHeight),
+                        )
+                        drawText(keyText, topLeft = keyTopLeft)
+                        val valueTopLeft =
+                            keyTopLeft.plus(Offset(0f, keyText.size.height.toFloat()))
+                        drawText(valueText, topLeft = valueTopLeft)
+                    }
+                }
             }
         }
     }
+}
+
+fun measureTextMaxWidth(
+    textMeasurer: TextMeasurer,
+    texts: List<String>,
+    fontSize: TextUnit
+): Float {
+    var maxWidth = 0f
+    texts.forEach {
+        val text = textMeasurer.measure(it, style = TextStyle(fontSize = fontSize))
+        if (text.size.width > maxWidth) {
+            maxWidth = text.size.width.toFloat()
+        }
+    }
+    return maxWidth
 }
 
 /**
@@ -95,7 +196,7 @@ data class DrawData(
 private class DrawArcPoints(
     val center: Offset,
     val startAngle: Offset,
-    val sweepAngle: Offset
+    val sweepAngle: Offset,
 ) {
     fun toPath() = Path().apply {
         moveTo(center.x, center.y)
@@ -105,16 +206,16 @@ private class DrawArcPoints(
 }
 
 
-@Preview
+@Preview(widthDp = 640, heightDp = 360)
 @Composable
 fun PokemonStatsWidgetPreview() {
     val list = mutableListOf(
-        DrawData("HP", "204"),
-        DrawData("攻击", "204"),
-        DrawData("速度", "204"),
         DrawData("防御", "204"),
+        DrawData("速度", "204"),
         DrawData("特防", "204"),
         DrawData("特攻", "204"),
+        DrawData("HP", "204/204"),
+        DrawData("攻击", "204"),
     )
     PokemonStatsWidget(data = list)
 }
