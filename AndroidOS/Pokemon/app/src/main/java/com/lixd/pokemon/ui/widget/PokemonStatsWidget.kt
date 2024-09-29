@@ -47,13 +47,19 @@ fun PokemonStatsWidget(count: Int = 6, data: List<DrawData> = mutableListOf()) {
             //组装数据
             val drawData = mutableListOf<DrawArcPoints>()
             for (i in 0 until count) {
+                val valueData = data[i]
                 val points = calculateArcPoints(center.x, center.y, radius, startAngle, angle)
+                val regionRadius = radius * valueData.percentValue
+                val regionPoints =
+                    calculateArcPoints(center.x, center.y, regionRadius, startAngle, angle)
                 drawData.add(
                     DrawArcPoints(
                         Offset(center.x, center.y),
                         points.first,
-                        points.second
-                    ),
+                        points.second,
+                        regionPoints.first,
+                        valueData
+                    )
                 )
                 startAngle += angle
             }
@@ -66,13 +72,30 @@ fun PokemonStatsWidget(count: Int = 6, data: List<DrawData> = mutableListOf()) {
                 drawLine(Color.White, it.center, it.sweepAngle, strokeWidth = 2f)
             }
 
+            //绘制区域
+            val regionPath = Path()
+            drawData.forEachIndexed { index, drawArcPoints ->
+                val point = drawArcPoints.regionPoint
+                if (index == 0) {
+                    regionPath.moveTo(point.x, point.y)
+                } else {
+                    regionPath.lineTo(point.x, point.y)
+                }
+            }
+            drawPath(regionPath, Color.Red)
+
             //绘制文字
             drawData.forEachIndexed { index, drawArcPoints ->
                 val center = Offset(drawArcPoints.startAngle.x, drawArcPoints.startAngle.y)
+                val itemData = drawArcPoints.data
                 //先测量文本的最大宽度，得到最大宽度可以设置constraints属性来保证文字的居中
-                val maxWidth = measureTextMaxWidth(textMeasurer, mutableListOf(data[index].key,data[index].value),12.sp)
+                val maxWidth = measureTextMaxWidth(
+                    textMeasurer,
+                    mutableListOf(itemData.key, itemData.value),
+                    12.sp
+                )
                 val keyText = textMeasurer.measure(
-                    data[index].key,
+                    itemData.key,
                     style = TextStyle(
                         fontSize = 12.sp,
                         color = Color.Black,
@@ -81,7 +104,7 @@ fun PokemonStatsWidget(count: Int = 6, data: List<DrawData> = mutableListOf()) {
                     constraints = Constraints(maxWidth.toInt())
                 )
                 val valueText = textMeasurer.measure(
-                    data[index].value,
+                    itemData.value,
                     style = TextStyle(
                         fontSize = 12.sp,
                         color = Color.Black,
@@ -141,6 +164,7 @@ fun PokemonStatsWidget(count: Int = 6, data: List<DrawData> = mutableListOf()) {
                         drawText(valueText, topLeft = valueTopLeft)
                     }
                 }
+
             }
         }
     }
@@ -191,12 +215,15 @@ fun calculateArcPoints(
 data class DrawData(
     val key: String,
     val value: String,
+    val percentValue: Float = 0f,
 )
 
 private class DrawArcPoints(
     val center: Offset,
     val startAngle: Offset,
     val sweepAngle: Offset,
+    val regionPoint: Offset,
+    val data: DrawData,
 ) {
     fun toPath() = Path().apply {
         moveTo(center.x, center.y)
@@ -210,12 +237,12 @@ private class DrawArcPoints(
 @Composable
 fun PokemonStatsWidgetPreview() {
     val list = mutableListOf(
-        DrawData("防御", "204"),
-        DrawData("速度", "204"),
-        DrawData("特防", "204"),
-        DrawData("特攻", "204"),
-        DrawData("HP", "204/204"),
-        DrawData("攻击", "204"),
+        DrawData("防御", "45", 0.45f),
+        DrawData("速度", "49", 0.49f),
+        DrawData("特防", "49", 0.49f),
+        DrawData("特攻", "65", 0.65f),
+        DrawData("HP", "65", 0.65f),
+        DrawData("攻击", "45", 0.45f),
     )
     PokemonStatsWidget(data = list)
 }
