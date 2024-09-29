@@ -21,7 +21,23 @@ class PokemonDescriptionViewModel(
                 pokemonRepository.getPokemon(id)
             }.onSuccess { data ->
                 viewStatus.update { it.copy(data = data) }
+                //请求能力数据
+                data.abilities?.first()?.let {
+                    getAbility(it.ability.url)
+                }
             }.onFailure {
+            }
+        }
+    }
+
+    fun getAbility(url: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            runCatching {
+                pokemonRepository.getAbility(url)
+            }.onSuccess { data ->
+                viewStatus.update { it.copy(ability = data) }
+            }.onFailure {
+
             }
         }
     }

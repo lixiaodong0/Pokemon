@@ -1,5 +1,6 @@
 package com.lixd.pokemon.network.service
 
+import com.lixd.pokemon.data.bean.AbilityDetailBean
 import com.lixd.pokemon.data.bean.PokemonBean
 import com.lixd.pokemon.data.bean.ResourceListBean
 import retrofit2.http.GET
@@ -25,4 +26,11 @@ interface PokemonService {
      */
     @GET("api/v2/pokemon/{id}")
     suspend fun getPokemon(@Path("id") id: Int): PokemonBean
+
+
+    /**
+     * 获取能力
+     */
+    @GET
+    suspend fun getAbility(@Url url: String): AbilityDetailBean
 }

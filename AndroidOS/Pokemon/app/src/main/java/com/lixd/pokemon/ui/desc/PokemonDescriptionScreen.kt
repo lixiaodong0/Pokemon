@@ -1,13 +1,22 @@
 package com.lixd.pokemon.ui.desc
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -17,13 +26,17 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
+import com.lixd.pokemon.data.bean.AbilityDetailBean
 import com.lixd.pokemon.data.bean.PokemonBean
 import com.lixd.pokemon.ui.desc.info.PokemonInfoCardContainer
+import com.lixd.pokemon.ui.desc.info.PokemonMoveCardContainer
+import com.lixd.pokemon.ui.desc.info.PokemonStatsCardContainer
 
 @Composable
 fun PokemonDescriptionScreen(
@@ -32,6 +45,9 @@ fun PokemonDescriptionScreen(
     pokemonId: Int = 0
 ) {
     val viewStatus by viewModel.viewStatus.collectAsStateWithLifecycle()
+    var tabSelectedIndex by remember {
+        mutableIntStateOf(0)
+    }
 
     LaunchedEffect(key1 = null, block = {
         viewModel.getPokemon(pokemonId)
@@ -74,8 +90,17 @@ fun PokemonDescriptionScreen(
             modifier = Modifier
                 .fillMaxWidth(0.5f)
                 .padding(top = topBarHeight),
-            data = viewStatus.data
+            tabSelectedIndex = tabSelectedIndex,
+            data = viewStatus.data,
+            ability = viewStatus.ability
         )
+        TopTabIndicator(
+            Modifier
+                .height(topBarHeight)
+                .fillMaxWidth(0.5f)
+        ) {
+            tabSelectedIndex = it
+        }
         RightContent(
             modifier = Modifier
                 .fillMaxWidth(0.5f)
@@ -86,22 +111,53 @@ fun PokemonDescriptionScreen(
 }
 
 @Composable
-fun LeftContent(modifier: Modifier, data: PokemonBean?) {
+fun LeftContent(
+    modifier: Modifier,
+    tabSelectedIndex: Int,
+    data: PokemonBean?,
+    ability: AbilityDetailBean?
+) {
     Box(modifier = modifier) {
         data?.run {
-            val attributeValue = types?.map {
-                it.type.name
-            } ?: emptyList()
-            PokemonInfoCardContainer(
-                nameValue = data.name,
-                heightValue = data.height,
-                weightValue = data.weight,
-                attributeValue = attributeValue,
-                killExperienceValue = data.baseExperience,
-            )
+            if (tabSelectedIndex == 0) {
+                val attributeValue = types?.map {
+                    it.type.name
+                } ?: emptyList()
+                PokemonInfoCardContainer(
+                    nameValue = data.name,
+                    heightValue = "${data.height * 0.10f}",
+                    weightValue = "${data.weight * 0.10f}",
+                    attributeValue = attributeValue,
+                    killExperienceValue = data.baseExperience,
+                )
+            }
+            if (tabSelectedIndex == 1) {
+                PokemonStatsCardContainer(data.stats, ability)
+            }
+            if (tabSelectedIndex == 2) {
+                PokemonMoveCardContainer(data.moves ?: emptyList())
+            }
         }
     }
 }
+
+@Composable
+fun TopTabIndicator(modifier: Modifier, onSelected: (Int) -> Unit) {
+    Row(modifier = modifier) {
+        Text(text = "info", fontSize = 14.sp, color = Color.Black, modifier = Modifier.clickable {
+            onSelected.invoke(0)
+        })
+        Spacer(modifier = Modifier.size(8.dp))
+        Text(text = "stats", fontSize = 14.sp, color = Color.Black, modifier = Modifier.clickable {
+            onSelected.invoke(1)
+        })
+        Spacer(modifier = Modifier.size(8.dp))
+        Text(text = "moves", fontSize = 14.sp, color = Color.Black, modifier = Modifier.clickable {
+            onSelected.invoke(2)
+        })
+    }
+}
+
 
 @Composable
 fun RightContent(modifier: Modifier, data: PokemonBean?) {
@@ -114,7 +170,7 @@ fun RightContent(modifier: Modifier, data: PokemonBean?) {
                 contentScale = ContentScale.Inside,
                 modifier = Modifier.fillMaxSize(),
 
-            )
+                )
         }
     }
 }
@@ -123,7 +179,7 @@ fun RightContent(modifier: Modifier, data: PokemonBean?) {
 @Preview(widthDp = 640, heightDp = 360)
 @Composable
 fun PokemonDescriptionScreenPreview() {
-//    PokemonDescriptionScreen()
+    PokemonDescriptionScreen()
 }
 
 

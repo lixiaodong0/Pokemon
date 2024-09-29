@@ -30,11 +30,12 @@ import kotlin.math.cos
 import kotlin.math.min
 import kotlin.math.sin
 
+
 @Composable
 fun PokemonStatsWidget(count: Int = 6, data: List<DrawData> = mutableListOf()) {
-    val textMeasurer = rememberTextMeasurer()
-
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+    //这里需要测量多个文本，cacheSize会缓存导致不准确，这里需要手动去掉缓存
+    val textMeasurer = rememberTextMeasurer(0)
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
         val rectSize = 200.dp
         Canvas(modifier = Modifier.size(rectSize)) {
             //半径
@@ -65,14 +66,14 @@ fun PokemonStatsWidget(count: Int = 6, data: List<DrawData> = mutableListOf()) {
             }
             //绘制三角区域
             drawData.forEach {
-                drawPath(it.toPath(), Color.Gray)
+                drawPath(it.toPath(), Color(0xffd3d3d1))
             }
             //绘制区域线条
             drawData.forEach {
-                drawLine(Color.White, it.center, it.sweepAngle, strokeWidth = 2f)
+                drawLine(Color(0xffeaebe8), it.center, it.sweepAngle, strokeWidth = 2f)
             }
 
-            //绘制区域
+            //绘制连接区域色块
             val regionPath = Path()
             drawData.forEachIndexed { index, drawArcPoints ->
                 val point = drawArcPoints.regionPoint
@@ -82,7 +83,7 @@ fun PokemonStatsWidget(count: Int = 6, data: List<DrawData> = mutableListOf()) {
                     regionPath.lineTo(point.x, point.y)
                 }
             }
-            drawPath(regionPath, Color.Red)
+            drawPath(regionPath, Color(0xff9899e9))
 
             //绘制文字
             drawData.forEachIndexed { index, drawArcPoints ->
@@ -122,11 +123,11 @@ fun PokemonStatsWidget(count: Int = 6, data: List<DrawData> = mutableListOf()) {
                     //最右边两个
                     0, 5 -> {
                         val keyTopLeft = center.minus(Offset(-horizontalMargin, maxHeight / 2))
-                        drawRect(
-                            Color.White,
-                            topLeft = keyTopLeft,
-                            size = Size(maxWidth, maxHeight),
-                        )
+//                        drawRect(
+//                            Color.White,
+//                            topLeft = keyTopLeft,
+//                            size = Size(maxWidth, maxHeight),
+//                        )
                         drawText(keyText, topLeft = keyTopLeft)
                         val valueTopLeft =
                             keyTopLeft.plus(Offset(0f, keyText.size.height.toFloat()))
@@ -139,11 +140,11 @@ fun PokemonStatsWidget(count: Int = 6, data: List<DrawData> = mutableListOf()) {
                         } else {
                             center.minus(Offset(maxWidth / 2, maxHeight + verticalMargin))
                         }
-                        drawRect(
-                            Color.White,
-                            topLeft = keyTopLeft,
-                            size = Size(maxWidth, maxHeight),
-                        )
+//                        drawRect(
+//                            Color.White,
+//                            topLeft = keyTopLeft,
+//                            size = Size(maxWidth, maxHeight),
+//                        )
                         drawText(keyText, topLeft = keyTopLeft)
                         val valueTopLeft =
                             keyTopLeft.plus(Offset(0f, keyText.size.height.toFloat()))
@@ -153,11 +154,11 @@ fun PokemonStatsWidget(count: Int = 6, data: List<DrawData> = mutableListOf()) {
                     2, 3 -> {
                         val keyTopLeft =
                             center.minus(Offset(maxWidth + horizontalMargin, maxHeight / 2))
-                        drawRect(
-                            Color.White,
-                            topLeft = keyTopLeft,
-                            size = Size(maxWidth, maxHeight),
-                        )
+//                        drawRect(
+//                            Color.White,
+//                            topLeft = keyTopLeft,
+//                            size = Size(maxWidth, maxHeight),
+//                        )
                         drawText(keyText, topLeft = keyTopLeft)
                         val valueTopLeft =
                             keyTopLeft.plus(Offset(0f, keyText.size.height.toFloat()))
@@ -233,16 +234,16 @@ private class DrawArcPoints(
 }
 
 
-@Preview(widthDp = 640, heightDp = 360)
+@Preview(widthDp = 640, heightDp = 360, showBackground = true,backgroundColor = 0xFFFFFF)
 @Composable
 fun PokemonStatsWidgetPreview() {
     val list = mutableListOf(
-        DrawData("防御", "45", 0.45f),
-        DrawData("速度", "49", 0.49f),
-        DrawData("特防", "49", 0.49f),
-        DrawData("特攻", "65", 0.65f),
-        DrawData("HP", "65", 0.65f),
-        DrawData("攻击", "45", 0.45f),
+        DrawData("defense", "45", 0.45f),
+        DrawData("speed", "49", 0.49f),
+        DrawData("special-defense", "49", 0.49f),
+        DrawData("special-attack", "65", 0.65f),
+        DrawData("hp", "65", 0.65f),
+        DrawData("attack", "45", 0.45f),
     )
     PokemonStatsWidget(data = list)
 }

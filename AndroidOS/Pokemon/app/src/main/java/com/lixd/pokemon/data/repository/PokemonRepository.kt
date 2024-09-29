@@ -1,5 +1,6 @@
 package com.lixd.pokemon.data.repository
 
+import com.lixd.pokemon.data.bean.AbilityDetailBean
 import com.lixd.pokemon.data.bean.PokemonBean
 import com.lixd.pokemon.data.bean.ResourceListBean
 import com.lixd.pokemon.network.service.POKEMON_INDEX_URL
@@ -13,5 +14,9 @@ class PokemonRepository(private val pokemonService: PokemonService) {
 
     suspend fun getPokemon(id: Int): PokemonBean {
         return pokemonService.getPokemon(id)
+    }
+
+    suspend fun getAbility(url: String): AbilityDetailBean {
+        return pokemonService.getAbility(url)
     }
 }

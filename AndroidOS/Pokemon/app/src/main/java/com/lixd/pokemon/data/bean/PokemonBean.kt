@@ -10,9 +10,9 @@ data class PokemonBean(
     @SerializedName("base_experience")
     val baseExperience: String,
     @SerializedName("height")
-    val height: String,
+    val height: Int,
     @SerializedName("weight")
-    val weight: String,
+    val weight: Int,
     @SerializedName("stats")
     val stats: List<StatsBean>,
     @SerializedName("abilities")
@@ -21,4 +21,6 @@ data class PokemonBean(
     val sprites: SpritesBean,
     @SerializedName("types")
     val types: List<TypesBean>?,
+    @SerializedName("moves")
+    val moves: List<MovesBean>?,
 )

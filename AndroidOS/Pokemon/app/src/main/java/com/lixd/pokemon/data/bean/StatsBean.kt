@@ -4,7 +4,7 @@ import com.google.gson.annotations.SerializedName
 
 data class StatsBean(
     @SerializedName("base_stat")
-    val baseStat: String,
+    val baseStat: Int,
     @SerializedName("effort")
     val effort: String,
     @SerializedName("stat")
