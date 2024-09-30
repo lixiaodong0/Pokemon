@@ -125,8 +125,8 @@ fun LeftContent(
                 } ?: emptyList()
                 PokemonInfoCardContainer(
                     nameValue = data.name,
-                    heightValue = "${data.height * 0.10f}",
-                    weightValue = "${data.weight * 0.10f}",
+                    heightValue = "${data.height / 10f}",
+                    weightValue = "${data.weight / 10f}",
                     attributeValue = attributeValue,
                     killExperienceValue = data.baseExperience,
                 )
@@ -134,6 +134,7 @@ fun LeftContent(
             if (tabSelectedIndex == 1) {
                 PokemonStatsCardContainer(data.stats, ability)
             }
+
             if (tabSelectedIndex == 2) {
                 PokemonMoveCardContainer(data.moves ?: emptyList())
             }
