@@ -1,7 +1,9 @@
 package com.lixd.pokemon.ui.desc
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -10,6 +12,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.ArrowDropDown
+import androidx.compose.material.icons.rounded.KeyboardArrowLeft
+import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -22,7 +30,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.center
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -37,6 +49,8 @@ import com.lixd.pokemon.data.bean.PokemonBean
 import com.lixd.pokemon.ui.desc.info.PokemonInfoCardContainer
 import com.lixd.pokemon.ui.desc.info.PokemonMoveCardContainer
 import com.lixd.pokemon.ui.desc.info.PokemonStatsCardContainer
+import com.lixd.pokemon.ui.widget.PokeBallIcon
+import com.lixd.pokemon.ui.widget.PokeStatsIcon
 
 @Composable
 fun PokemonDescriptionScreen(
@@ -97,7 +111,14 @@ fun PokemonDescriptionScreen(
         TopTabIndicator(
             Modifier
                 .height(topBarHeight)
-                .fillMaxWidth(0.5f)
+                .fillMaxWidth(0.5f),
+            tabSelectedIndex,
+            onBack = {
+                tabSelectedIndex = if (tabSelectedIndex - 1 < 0) 0 else tabSelectedIndex - 1
+            },
+            onNext = {
+                tabSelectedIndex = if (tabSelectedIndex + 1 > 2) 2 else tabSelectedIndex + 1
+            }
         ) {
             tabSelectedIndex = it
         }
@@ -143,19 +164,67 @@ fun LeftContent(
 }
 
 @Composable
-fun TopTabIndicator(modifier: Modifier, onSelected: (Int) -> Unit) {
-    Row(modifier = modifier) {
-        Text(text = "info", fontSize = 14.sp, color = Color.Black, modifier = Modifier.clickable {
-            onSelected.invoke(0)
-        })
-        Spacer(modifier = Modifier.size(8.dp))
-        Text(text = "stats", fontSize = 14.sp, color = Color.Black, modifier = Modifier.clickable {
-            onSelected.invoke(1)
-        })
-        Spacer(modifier = Modifier.size(8.dp))
+fun TopTabIndicator(
+    modifier: Modifier,
+    selectedIndex: Int,
+    onBack: () -> Unit,
+    onNext: () -> Unit,
+    onSelected: (Int) -> Unit
+) {
+    val spaceSize = 10.dp
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .widthIn(min = 40.dp)
+                .clickable { onBack() },
+            contentAlignment = Alignment.Center
+        ) {
+            Image(
+                painter = rememberVectorPainter(image = Icons.Rounded.PlayArrow),
+                modifier = Modifier
+                    .size(30.dp)
+                    .graphicsLayer {
+                        rotationX = 180f
+                        rotationY = 180f
+                    },
+                contentDescription = "",
+                colorFilter = ColorFilter.tint(Color.White)
+            )
+        }
+
+        Box(modifier = Modifier.widthIn(min = 40.dp), contentAlignment = Alignment.Center) {
+            PokeBallIcon(isSelected = selectedIndex == 0) {
+                onSelected.invoke(0)
+            }
+        }
+        Spacer(modifier = Modifier.size(spaceSize))
+        Box(modifier = Modifier.widthIn(min = 40.dp), contentAlignment = Alignment.Center) {
+            PokeStatsIcon(isSelected = selectedIndex == 1) {
+                onSelected.invoke(1)
+            }
+        }
+        Spacer(modifier = Modifier.size(spaceSize))
         Text(text = "moves", fontSize = 14.sp, color = Color.Black, modifier = Modifier.clickable {
             onSelected.invoke(2)
         })
+        Box(
+            modifier = Modifier
+                .widthIn(min = 40.dp)
+                .clickable { onNext() },
+            contentAlignment = Alignment.Center
+        ) {
+            Image(
+                painter = rememberVectorPainter(image = Icons.Rounded.PlayArrow),
+                modifier = Modifier
+                    .size(30.dp),
+                contentDescription = "",
+                colorFilter = ColorFilter.tint(Color.White)
+            )
+        }
     }
 }
 

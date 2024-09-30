@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.toSize
+import com.lixd.pokemon.util.AngleUtil
 import java.lang.Math.toRadians
 import kotlin.math.cos
 import kotlin.math.min
@@ -49,10 +50,10 @@ fun PokemonStatsWidget(count: Int = 6, data: List<DrawData> = mutableListOf()) {
             val drawData = mutableListOf<DrawArcPoints>()
             for (i in 0 until count) {
                 val valueData = data[i]
-                val points = calculateArcPoints(center.x, center.y, radius, startAngle, angle)
+                val points = AngleUtil.calculateArcPoints(center.x, center.y, radius, startAngle, angle)
                 val regionRadius = radius * valueData.percentValue
                 val regionPoints =
-                    calculateArcPoints(center.x, center.y, regionRadius, startAngle, angle)
+                    AngleUtil.calculateArcPoints(center.x, center.y, regionRadius, startAngle, angle)
                 drawData.add(
                     DrawArcPoints(
                         Offset(center.x, center.y),
@@ -184,33 +185,6 @@ fun measureTextMaxWidth(
         }
     }
     return maxWidth
-}
-
-/**
- * 计算一个圆弧的起点和终点坐标
- */
-fun calculateArcPoints(
-    centerX: Float,
-    centerY: Float,
-    radius: Float,
-    startAngle: Float, sweepAngle: Float
-): Pair<Offset, Offset> {
-
-    // 起始角度转换为弧度
-    val startRadians = toRadians(startAngle.toDouble())
-
-    // 终止角度转换为弧度
-    val endRadians = toRadians((startAngle + sweepAngle).toDouble())
-
-    // 起点坐标
-    val startX = centerX + radius * cos(startRadians)
-    val startY = centerY + radius * sin(startRadians)
-
-    // 终点坐标
-    val endX = centerX + radius * cos(endRadians)
-    val endY = centerY + radius * sin(endRadians)
-
-    return Pair(Offset(startX.toFloat(), startY.toFloat()), Offset(endX.toFloat(), endY.toFloat()))
 }
 
 data class DrawData(
