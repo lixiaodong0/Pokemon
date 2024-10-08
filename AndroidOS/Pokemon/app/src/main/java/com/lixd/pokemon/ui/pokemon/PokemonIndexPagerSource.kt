@@ -8,7 +8,10 @@ import com.lixd.pokemon.data.repository.PokemonRepository
 import com.lixd.pokemon.network.service.POKEMON_INDEX_URL
 
 data class CustomKey(val current: Int, val url: String)
-class PokemonIndexPagerSource(private val pokemonRepository: PokemonRepository) :
+class PokemonIndexPagerSource(
+    private val pokemonRepository: PokemonRepository,
+    private val onTotalSize: (Int) -> Unit = {}
+) :
     PagingSource<CustomKey, PokemonIndexBean>() {
     override fun getRefreshKey(state: PagingState<CustomKey, PokemonIndexBean>): CustomKey? = null
 
@@ -19,6 +22,8 @@ class PokemonIndexPagerSource(private val pokemonRepository: PokemonRepository) 
             val pageSize = params.loadSize   //每页的数据条数
 
             val result = pokemonRepository.getPokemonList(current.url)
+            onTotalSize(result.count)
+
             val data = mutableListOf<PokemonIndexBean>()
             if (!result.results.isNullOrEmpty()) {
                 result.results.forEachIndexed { index, resourceBean ->
@@ -36,10 +41,10 @@ class PokemonIndexPagerSource(private val pokemonRepository: PokemonRepository) 
                     current.current + 1,
                     result.next
                 ) else null //计算下一页，如果返回null,证明无数据了
-            Log.e(
-                "lixd",
-                "data:${data.size},current:${current},prevKey:${prevKey},nextKey:${nextKey}"
-            )
+//            Log.e(
+//                "lixd",
+//                "data:${data.size},current:${current},prevKey:${prevKey},nextKey:${nextKey}"
+//            )
             LoadResult.Page(data, prevKey, nextKey)
         } catch (e: Exception) {
             e.printStackTrace()

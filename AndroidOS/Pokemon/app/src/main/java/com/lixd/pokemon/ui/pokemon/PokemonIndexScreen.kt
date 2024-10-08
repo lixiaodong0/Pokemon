@@ -1,12 +1,17 @@
 package com.lixd.pokemon.ui.pokemon
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -16,7 +21,9 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Surface
@@ -24,18 +31,29 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.center
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PointMode
+import androidx.compose.ui.graphics.drawscope.clipPath
+import androidx.compose.ui.graphics.drawscope.clipRect
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
@@ -47,6 +65,10 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import com.lixd.pokemon.data.bean.PokemonIndexBean
 import com.lixd.pokemon.navigation.PokemonDescriptionRoute
+import com.lixd.pokemon.ui.widget.ImageKeyWidget
+import com.lixd.pokemon.ui.widget.NumberKeyWidget
+import com.lixd.pokemon.ui.widget.PokeBallIcon
+import com.lixd.pokemon.ui.widget.PokeBottomBar
 import kotlinx.coroutines.launch
 
 @Composable
@@ -57,14 +79,109 @@ fun PokemonIndexScreen(
     val lazyItems = viewModel.getPokemonIndex.collectAsLazyPagingItems()
     val lazyListState = rememberLazyListState()
     val viewStatus by viewModel.viewStatus.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+    Column(Modifier.fillMaxSize()) {
+        Box(modifier = Modifier
+            .fillMaxWidth()
+            .weight(1f, true)
+            .drawBehind {
+                val offset = size.center.x / 3
+                //第一层背景
+                drawRect(Color(0xfffdfcf8))
+                //第二层背景
+                val path = Path().apply {
+                    moveTo(center.x - offset, size.height)
+                    lineTo(center.x, 0f)
+                    lineTo(size.width, 0f)
+                    lineTo(size.width, size.height)
+                    close()
+                }
+                drawPath(path, Color(0xfff3533b))
+                //第三层背景
+                val path2 = Path().apply {
+                    moveTo(center.x, size.height)
+                    lineTo(center.x + offset, 0f)
+                    lineTo(size.width, 0f)
+                    lineTo(size.width, size.height)
+                    close()
+                }
+                drawPath(path2, Color(0xfffa7346))
+            }) {
+            PokemonIndexContainer(
+                modifier = Modifier
+                    .padding(top = 50.dp)
+                    .fillMaxWidth(0.5f)
+                    .align(Alignment.CenterEnd),
+                datas = lazyItems,
+                currentIndex = viewStatus.currentIndex,
+                state = lazyListState,
+            ) { index, item ->
+                if (viewStatus.currentIndex == index) {
+                    navController.navigate("${PokemonDescriptionRoute}/${item.number}")
+                }
+                viewModel.updateSelectedIndex(index, item)
+            }
+            PokemonImageContainer(
+                modifier = Modifier
+                    .fillMaxWidth(0.5f)
+                    .align(Alignment.CenterStart),
+                data = viewStatus.currentPokemonIndexBean
+            )
+            IndexTopBarContainer(viewStatus.totalCount)
+        }
+        PokeBottomBar(content = {
+            ImageKeyWidget(image = Icons.Default.KeyboardArrowUp, desc = "previous") {
+                val index = viewStatus.currentIndex - 1
+                try {
+                    val item = lazyItems[index]
+                    viewModel.updateSelectedIndex(index, item!!)
+                    coroutineScope.launch {
+                        lazyListState.scrollToItem(index)
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+            Spacer(modifier = Modifier.size(16.dp))
+            ImageKeyWidget(image = Icons.Default.KeyboardArrowDown, desc = "next") {
+                val index = viewStatus.currentIndex + 1
+                try {
+                    val item = lazyItems[index]
+                    viewModel.updateSelectedIndex(index, item!!)
+                    coroutineScope.launch {
+                        lazyListState.animateScrollToItem(index)
+//                        lazyListState.scrollToItem(index)
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+            Spacer(modifier = Modifier.size(16.dp))
+            NumberKeyWidget(key = "A", desc = "See Details") {
+                try {
+                    lazyItems[viewStatus.currentIndex]?.let {
+                        navController.navigate("${PokemonDescriptionRoute}/${it.number}")
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+        }, onBack = {
+            Toast.makeText(context, "返回", Toast.LENGTH_SHORT).show()
+            navController.popBackStack()
+        })
+    }
+}
 
+@Composable
+fun IndexTopBarContainer(totalCount: Int = 0) {
+    val topSpace = 10.dp
+    val topBarHeight = 40.dp
     Box(modifier = Modifier
         .fillMaxSize()
         .drawBehind {
             val offset = size.center.x / 3
-            //第一层背景
-            drawRect(Color(0xfffdfcf8))
-            //第二层背景
             val path = Path().apply {
                 moveTo(center.x - offset, size.height)
                 lineTo(center.x, 0f)
@@ -72,38 +189,48 @@ fun PokemonIndexScreen(
                 lineTo(size.width, size.height)
                 close()
             }
-            drawPath(path, Color(0xfff3533b))
-            //第三层背景
-            val path2 = Path().apply {
-                moveTo(center.x, size.height)
-                lineTo(center.x + offset, 0f)
-                lineTo(size.width, 0f)
-                lineTo(size.width, size.height)
-                close()
+            clipRect(0f, topSpace.toPx(), size.width, topSpace.toPx() + topBarHeight.toPx()) {
+                //第一层背景
+                drawRect(Color(0XFFefefef))
+                //第二层背景
+                drawPath(path, Color(0xE6000000))
             }
-            drawPath(path2, Color(0xfffa7346))
         }) {
-        PokemonIndexContainer(
+        Row(
             modifier = Modifier
-                .fillMaxWidth(0.5f)
-                .align(Alignment.CenterEnd),
-            datas = lazyItems,
-            currentIndex = viewStatus.currentIndex,
-            state = lazyListState,
-        ) { index, item ->
-            if (viewStatus.currentIndex == index) {
-                navController.navigate("${PokemonDescriptionRoute}/${item.number}")
+                .fillMaxWidth()
+                .padding(top = topSpace)
+                .height(topBarHeight)
+        ) {
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight(), contentAlignment = Alignment.Center
+            ) {
+                Row(
+                    modifier = Modifier
+                        .background(
+                            Color(0xE6000000), shape = RoundedCornerShape(40.dp)
+                        )
+                        .padding(horizontal = 8.dp, vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    PokeBallIcon()
+                    Spacer(modifier = Modifier.size(4.dp))
+                    Text(text = "$totalCount", fontSize = 14.sp, color = Color.White)
+                }
             }
-            viewModel.updateSelectedIndex(index, item)
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight(), contentAlignment = Alignment.Center
+            ) {
+                Text(text = "By Number", fontSize = 16.sp, color = Color.White)
+            }
         }
-        PokemonImageContainer(
-            modifier = Modifier
-                .fillMaxWidth(0.5f)
-                .align(Alignment.CenterStart),
-            data = viewStatus.currentPokemonIndexBean
-        )
     }
 }
+
 
 @Composable
 fun PokemonImageContainer(modifier: Modifier = Modifier, data: PokemonIndexBean?) {
@@ -144,9 +271,7 @@ fun PokemonIndexContainer(
 
 @Composable
 fun PokemonIndexItem(
-    isSelected: Boolean = false,
-    data: PokemonIndexBean,
-    onClick: () -> Unit
+    isSelected: Boolean = false, data: PokemonIndexBean, onClick: () -> Unit
 ) {
     val leftContentWeight = 0.4f
     val rightContentWeight = 0.6f
@@ -188,8 +313,7 @@ fun PokemonIndexItem(
                         drawPath(path, Color(0xff000200))
                     }
                 }
-                .padding(vertical = 4.dp)
-            ) {
+                .padding(vertical = 4.dp)) {
                 Text(
                     text = "No.${data.number}",
                     fontSize = 14.sp,
@@ -229,19 +353,9 @@ fun PokemonIndexItem(
     }
 }
 
-@Preview
-@Composable
-fun PokemonIndexItemPreview() {
-    val avatar =
-        "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/1.png"
-//    PokemonIndexItem(true, PokemonIndexBean(1, "bulbasaur", avatar))
-}
 
 @Preview
 @Composable
-fun PokemonIndexItemPreview2() {
-    val avatar =
-        "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/1.png"
-//    PokemonIndexItem(false, PokemonIndexBean(1, "bulbasaur", avatar))
+fun IndexTopBarContainerPreview() {
+    IndexTopBarContainer()
 }
-

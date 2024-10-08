@@ -25,10 +25,18 @@ class PokemonIndexViewModel(
         viewStatus.update { it.copy(currentIndex = index, currentPokemonIndexBean = bean) }
     }
 
+    fun updateTotalCount(totalCount: Int) {
+        viewStatus.update { it.copy(totalCount = totalCount) }
+    }
+
     val getPokemonIndex: Flow<PagingData<PokemonIndexBean>> by lazy {
         Pager(
             config = PagingConfig(pageSize = 20, initialLoadSize = 20),
-            pagingSourceFactory = { PokemonIndexPagerSource(pokemonRepository) })
+            pagingSourceFactory = {
+                PokemonIndexPagerSource(pokemonRepository, onTotalSize = {
+                    updateTotalCount(it)
+                })
+            })
             .flow.cachedIn(viewModelScope)
     }
 
