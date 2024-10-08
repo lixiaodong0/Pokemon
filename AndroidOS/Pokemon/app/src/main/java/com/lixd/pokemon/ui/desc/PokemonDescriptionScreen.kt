@@ -50,6 +50,7 @@ import com.lixd.pokemon.ui.desc.info.PokemonInfoCardContainer
 import com.lixd.pokemon.ui.desc.info.PokemonMoveCardContainer
 import com.lixd.pokemon.ui.desc.info.PokemonStatsCardContainer
 import com.lixd.pokemon.ui.widget.PokeBallIcon
+import com.lixd.pokemon.ui.widget.PokeMovesIcon
 import com.lixd.pokemon.ui.widget.PokeStatsIcon
 
 @Composable
@@ -208,9 +209,11 @@ fun TopTabIndicator(
             }
         }
         Spacer(modifier = Modifier.size(spaceSize))
-        Text(text = "moves", fontSize = 14.sp, color = Color.Black, modifier = Modifier.clickable {
-            onSelected.invoke(2)
-        })
+        Box(modifier = Modifier.widthIn(min = 40.dp), contentAlignment = Alignment.Center) {
+            PokeMovesIcon(isSelected = selectedIndex == 2) {
+                onSelected.invoke(2)
+            }
+        }
         Box(
             modifier = Modifier
                 .widthIn(min = 40.dp)

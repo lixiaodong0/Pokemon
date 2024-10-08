@@ -15,10 +15,13 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.ClipOp
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathOperation
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.tooling.preview.Preview
@@ -50,8 +53,8 @@ fun PokeMovesIcon(
         .size(animateSize)
         .clickable { onClick() }) {
         Canvas(modifier = Modifier.fillMaxSize()) {
-            val radiusOuter = min(this.size.width, this.size.height) / 2
-            val radiusInner = radiusOuter / 2 //五角星内圆半径
+            val radiusOuter = (min(this.size.width, this.size.height) / 2) - strokeWidth.value
+            val radiusInner = (radiusOuter / 2) - strokeWidth.value //五角星内圆半径
             val startAngle = (-Math.PI / 2).toFloat() //开始绘制点的外径角度
             val perAngle = (2 * Math.PI / starCount).toFloat() //两个五角星两个角直接的角度差
             val outAngles = (0 until starCount).map {
@@ -86,17 +89,25 @@ fun PokeMovesIcon(
                     path.close()
                 }
             }
-            rotate(15f) {
-                translate(this.size.width / 2, this.size.height / 2) {
-                    drawPath(path, currentColor, style = Stroke(width = strokeWidth.value))
+
+            //计算空白区域
+            val offset = 10f
+            val clipPath = Path().apply {
+                moveTo(0f, center.y)
+                lineTo(center.x + offset, center.y)
+                lineTo(center.x + offset, this@Canvas.size.height)
+                lineTo(0f, this@Canvas.size.height)
+                close()
+            }
+            clipPath(clipPath, ClipOp.Difference) {
+                rotate(15f) {
+                    translate(this.size.width / 2, this.size.height / 2) {
+                        drawPath(path, currentColor, style = Stroke(width = strokeWidth.value))
+                    }
                 }
             }
 
-            val offset = 10f
-            val clearTopLeft = Offset(0f, center.y)
-            val clearRectSize = Size(center.x + offset, this.size.height)
-            drawRect(currentColor, clearTopLeft, clearRectSize, blendMode = BlendMode.Clear)
-
+            //绘制圆角边框
             val rectWidth = (this.size.width / 2) * 0.8f
             val rectHeight = (this.size.height / 2) * 0.5f
             val rectTopLeft = Offset(offset, center.y + offset)
@@ -106,14 +117,22 @@ fun PokeMovesIcon(
                 style = Stroke(width = strokeWidth.value)
             )
 
-//            val smallRectHeight = rectHeight * 0.2f
-//            val top = rectTopLeft - smallRectHeight
-//            drawLine(
-//                currentColor,
-//                start = Offset(rectTopLeft.x, top),
-//                end = Offset(rectSize.width, top),
-//                strokeWidth = strokeWidth.value
-//            )
+            //绘制连接线条
+            val startX = rectTopLeft.x
+            val startY = rectTopLeft.y + rectHeight - rectHeight * 0.5f
+            val endX = rectTopLeft.x + rectSize.width
+            val endY = rectTopLeft.y + rectHeight - rectHeight * 0.3f
+            val linePath = Path().apply {
+                val centerWidth = endX * 0.25f
+                moveTo(startX, startY)
+                val startCenterX = startX + centerWidth
+                val startCenterY = startY
+                val endCenterX = startX + centerWidth
+                val endCenterY = endY
+                quadraticTo(startCenterX, startCenterY, endCenterX, endCenterY)
+                lineTo(endX, endY)
+            }
+            drawPath(linePath, currentColor, style = Stroke(strokeWidth.value))
         }
     }
 }
