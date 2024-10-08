@@ -131,7 +131,7 @@ fun PokemonIndexScreen(
             IndexTopBarContainer(viewStatus.totalCount)
         }
         PokeBottomBar(content = {
-            ImageKeyWidget(image = Icons.Default.KeyboardArrowUp, desc = "previous") {
+            ImageKeyWidget(image = Icons.Default.KeyboardArrowUp, desc = "Previous") {
                 val index = viewStatus.currentIndex - 1
                 try {
                     val item = lazyItems[index]
@@ -144,7 +144,7 @@ fun PokemonIndexScreen(
                 }
             }
             Spacer(modifier = Modifier.size(16.dp))
-            ImageKeyWidget(image = Icons.Default.KeyboardArrowDown, desc = "next") {
+            ImageKeyWidget(image = Icons.Default.KeyboardArrowDown, desc = "Next") {
                 val index = viewStatus.currentIndex + 1
                 try {
                     val item = lazyItems[index]
