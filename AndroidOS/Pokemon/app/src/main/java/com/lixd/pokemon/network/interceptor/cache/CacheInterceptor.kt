@@ -18,8 +18,6 @@ class CacheInterceptor(
         //只针对GET缓存
         if (result.method == "GET") {
             val url = result.url.toString()
-            val findCache = false
-
             //读取缓存
             if (cacheManager.checkCache(url)) {
                 val cacheContent = cacheManager.readCache(url)
@@ -36,19 +34,17 @@ class CacheInterceptor(
             }
 
             //写入缓存
-            if (!findCache) {
-                val response = chain.proceed(result)
-                val responseBody = response.body ?: return response
-                val data = responseBody.bytes()
-                val contentStr = String(data)
-                if (response.code == 200 && contentStr.isNotEmpty()) {
-                    Log.d("CacheInterceptor", "url:${url},写入缓存")
-                    cacheManager.writeCache(url, contentStr)
-                }
-                return response.newBuilder()
-                    .body(contentStr.toResponseBody())
-                    .build()
+            val response = chain.proceed(result)
+            val responseBody = response.body ?: return response
+            val data = responseBody.bytes()
+            val contentStr = String(data)
+            if (response.code == 200 && contentStr.isNotEmpty()) {
+                Log.d("CacheInterceptor", "url:${url},写入缓存")
+                cacheManager.writeCache(url, contentStr)
             }
+            return response.newBuilder()
+                .body(contentStr.toResponseBody())
+                .build()
         }
         return chain.proceed(result)
     }
