@@ -1,5 +1,8 @@
 package com.lixd.pokemon.network.retrofit
 
+import com.lixd.pokemon.PokemonApplication
+import com.lixd.pokemon.network.interceptor.cache.CacheInterceptor
+import com.lixd.pokemon.network.interceptor.cache.CacheManager
 import com.lixd.pokemon.network.interceptor.httpLoggingInterceptor
 import com.lixd.pokemon.network.service.BASE_URL
 import com.lixd.pokemon.network.service.PokemonService
@@ -14,6 +17,7 @@ object RetrofitProvider {
             .readTimeout(15, TimeUnit.MINUTES)
             .writeTimeout(15, TimeUnit.MINUTES)
             .connectTimeout(15, TimeUnit.MINUTES)
+            .addInterceptor(CacheInterceptor(CacheManager()))
             .addInterceptor(httpLoggingInterceptor)
             .build()
     }
