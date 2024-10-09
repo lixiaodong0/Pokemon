@@ -118,7 +118,9 @@ fun PokemonIndexScreen(
                 state = lazyListState,
             ) { index, item ->
                 if (viewStatus.currentIndex == index) {
-                    navController.navigate("${PokemonDescriptionRoute}/${item.number}")
+                    navController.navigate("${PokemonDescriptionRoute}/${item.number}") {
+                        launchSingleTop = true
+                    }
                 }
                 viewModel.updateSelectedIndex(index, item)
             }
@@ -161,7 +163,9 @@ fun PokemonIndexScreen(
             NumberKeyWidget(key = "A", desc = "See Details") {
                 try {
                     lazyItems[viewStatus.currentIndex]?.let {
-                        navController.navigate("${PokemonDescriptionRoute}/${it.number}")
+                        navController.navigate("${PokemonDescriptionRoute}/${it.number}") {
+                            launchSingleTop = true
+                        }
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
