@@ -5,6 +5,7 @@ import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.lixd.pokemon.data.bean.PokemonIndexBean
 import com.lixd.pokemon.data.repository.PokemonRepository
+import com.lixd.pokemon.db.DBManager
 import com.lixd.pokemon.network.service.POKEMON_INDEX_URL
 
 data class CustomKey(val current: Int, val url: String)
@@ -28,7 +29,14 @@ class PokemonIndexPagerSource(
             if (!result.results.isNullOrEmpty()) {
                 result.results.forEachIndexed { index, resourceBean ->
                     val number = (current.current - 1) * pageSize + (index + 1)
-                    data.add(PokemonIndexBean(number, resourceBean.name, ""))
+                    val image = DBManager.db.pokemonImageDao().queryImage(number)
+                    data.add(
+                        PokemonIndexBean(
+                            number,
+                            resourceBean.name,
+                            image?.officialDefaultFrontImage ?: ""
+                        )
+                    )
                 }
             }
             val prevKey =

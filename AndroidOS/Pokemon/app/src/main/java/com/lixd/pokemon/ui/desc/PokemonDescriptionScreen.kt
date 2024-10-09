@@ -126,6 +126,7 @@ fun PokemonDescriptionScreen(
         RightContent(
             modifier = Modifier
                 .fillMaxWidth(0.5f)
+                .fillMaxSize()
                 .align(Alignment.CenterEnd),
             data = viewStatus.data
         )
@@ -234,16 +235,15 @@ fun TopTabIndicator(
 
 @Composable
 fun RightContent(modifier: Modifier, data: PokemonBean?) {
-    Box(modifier = modifier) {
+    Box(modifier = modifier, contentAlignment = Alignment.Center) {
         data?.run {
             val image = sprites.other.officialArtwork.frontDefault
             AsyncImage(
                 model = image,
                 contentDescription = null,
-                contentScale = ContentScale.Inside,
-                modifier = Modifier.fillMaxSize(),
-
-                )
+                modifier = Modifier.fillMaxSize(0.7f),
+                contentScale = ContentScale.Fit
+            )
         }
     }
 }

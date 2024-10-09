@@ -25,7 +25,7 @@ class CacheInterceptor(
                     Log.d("CacheInterceptor", "url:${url},读取缓存")
                     return Response.Builder()
                         .code(200)
-                        .request(result)
+                        .request(result.newBuilder().build())
                         .body(cacheContent.toResponseBody())
                         .message("from disk cache")
                         .protocol(Protocol.HTTP_2)

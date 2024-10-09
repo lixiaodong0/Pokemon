@@ -38,7 +38,8 @@ class CacheManager(private val cacheDir: File = REQUEST_CACHE_DIR) {
         try {
             file.writeText(content)
             return true
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
         return false
     }

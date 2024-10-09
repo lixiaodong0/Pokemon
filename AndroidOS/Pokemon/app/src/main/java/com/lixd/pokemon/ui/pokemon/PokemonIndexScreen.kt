@@ -1,11 +1,13 @@
 package com.lixd.pokemon.ui.pokemon
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -30,8 +32,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -60,6 +64,7 @@ import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
@@ -81,6 +86,11 @@ fun PokemonIndexScreen(
     val viewStatus by viewModel.viewStatus.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
+
+    var firstLoadSelect by remember {
+        mutableStateOf(false)
+    }
+
     Column(Modifier.fillMaxSize()) {
         Box(modifier = Modifier
             .fillMaxWidth()
@@ -173,8 +183,24 @@ fun PokemonIndexScreen(
             }
         }, onBack = {
             Toast.makeText(context, "返回", Toast.LENGTH_SHORT).show()
-            navController.popBackStack()
+//            navController.popBackStack()
         })
+    }
+
+    //首次加载选中逻辑
+    if (!firstLoadSelect) {
+        if (lazyItems.loadState.refresh is LoadState.NotLoading) {
+            if (lazyItems.itemCount > 0) {
+                firstLoadSelect = true
+                val index = 0
+                try {
+                    val item = lazyItems[index]
+                    viewModel.updateSelectedIndex(index, item!!)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+        }
     }
 }
 
@@ -241,14 +267,15 @@ fun PokemonImageContainer(modifier: Modifier = Modifier, data: PokemonIndexBean?
     Box(
         modifier = modifier
             .fillMaxWidth(0.5f)
-            .fillMaxHeight()
+            .fillMaxHeight(),
+        contentAlignment = Alignment.BottomCenter
     ) {
         data?.let {
             AsyncImage(
                 model = it.avatar,
                 contentDescription = null,
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize(0.8f),
+                contentScale = ContentScale.Fit,
             )
         }
     }
@@ -262,7 +289,11 @@ fun PokemonIndexContainer(
     currentIndex: Int = 0,
     onItemClick: (Int, PokemonIndexBean) -> Unit,
 ) {
-    LazyColumn(modifier = modifier, state = state) {
+    LazyColumn(
+        modifier = modifier,
+        state = state,
+        contentPadding = PaddingValues(vertical = 10.dp)
+    ) {
         items(datas.itemCount) { index ->
             datas[index]?.run {
                 PokemonIndexItem(index == currentIndex, this) {

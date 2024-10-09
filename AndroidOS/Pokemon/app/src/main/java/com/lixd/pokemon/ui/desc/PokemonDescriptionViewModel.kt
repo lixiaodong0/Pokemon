@@ -26,6 +26,7 @@ class PokemonDescriptionViewModel(
                     getAbility(it.ability.url)
                 }
             }.onFailure {
+                it.printStackTrace()
             }
         }
     }
@@ -37,7 +38,7 @@ class PokemonDescriptionViewModel(
             }.onSuccess { data ->
                 viewStatus.update { it.copy(ability = data) }
             }.onFailure {
-
+                it.printStackTrace()
             }
         }
     }
