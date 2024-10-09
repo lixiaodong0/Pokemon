@@ -39,6 +39,7 @@ import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -87,7 +88,7 @@ fun PokemonIndexScreen(
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
 
-    var firstLoadSelect by remember {
+    var firstLoadSelect by rememberSaveable {
         mutableStateOf(false)
     }
 
@@ -192,7 +193,8 @@ fun PokemonIndexScreen(
         if (lazyItems.loadState.refresh is LoadState.NotLoading) {
             if (lazyItems.itemCount > 0) {
                 firstLoadSelect = true
-                val index = 0
+                Log.d("lixd","首次加载选中了...")
+                val index = viewStatus.currentIndex
                 try {
                     val item = lazyItems[index]
                     viewModel.updateSelectedIndex(index, item!!)
