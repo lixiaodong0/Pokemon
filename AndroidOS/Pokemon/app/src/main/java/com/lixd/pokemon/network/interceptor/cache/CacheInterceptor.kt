@@ -35,16 +35,20 @@ class CacheInterceptor(
 
             //写入缓存
             val response = chain.proceed(result)
-            val responseBody = response.body ?: return response
-            val data = responseBody.bytes()
-            val contentStr = String(data)
-            if (response.code == 200 && contentStr.isNotEmpty()) {
-                Log.d("CacheInterceptor", "url:${url},写入缓存")
-                cacheManager.writeCache(url, contentStr)
+            //content-type: application/json; charset=utf-8
+            val contentType = response.header("content-type") ?: ""
+            if (contentType.contains("application/json")) {
+                val responseBody = response.body ?: return response
+                val data = responseBody.bytes()
+                val contentStr = String(data)
+                if (response.code == 200 && contentStr.isNotEmpty()) {
+                    Log.d("CacheInterceptor", "url:${url},写入缓存")
+                    cacheManager.writeCache(url, contentStr)
+                }
+                return response.newBuilder()
+                    .body(contentStr.toResponseBody())
+                    .build()
             }
-            return response.newBuilder()
-                .body(contentStr.toResponseBody())
-                .build()
         }
         return chain.proceed(result)
     }

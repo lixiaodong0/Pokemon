@@ -68,6 +68,7 @@ import androidx.navigation.NavHostController
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
+import coil.Coil
 import coil.compose.AsyncImage
 import com.lixd.pokemon.data.bean.PokemonIndexBean
 import com.lixd.pokemon.navigation.PokemonDescriptionRoute
@@ -91,6 +92,7 @@ fun PokemonIndexScreen(
     var firstLoadSelect by rememberSaveable {
         mutableStateOf(false)
     }
+    Coil
 
     Column(Modifier.fillMaxSize()) {
         Box(modifier = Modifier

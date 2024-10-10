@@ -5,7 +5,7 @@ import com.lixd.pokemon.util.md5
 import java.io.File
 
 
-val REQUEST_CACHE_DIR = PokemonApplication.appContext.externalCacheDir!!
+val REQUEST_CACHE_DIR = File(PokemonApplication.appContext.externalCacheDir!!, "response_cache")
 
 class CacheManager(private val cacheDir: File = REQUEST_CACHE_DIR) {
 
