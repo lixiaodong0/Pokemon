@@ -22,7 +22,7 @@ class PokemonApplication : Application() {
     }
 
     private fun initCoil(context: Context) {
-        val imageCacheDir = File(context.externalCacheDir!!, "image_cache")
+        val imageCacheDir = File(context.getExternalFilesDir("")!!, "image_cache")
         if (!imageCacheDir.exists()) {
             imageCacheDir.mkdirs()
         }
