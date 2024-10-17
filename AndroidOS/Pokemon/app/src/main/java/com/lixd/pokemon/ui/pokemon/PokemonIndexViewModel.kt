@@ -7,18 +7,18 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
-import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.insertFooterItem
 import androidx.paging.map
 import com.lixd.pokemon.data.bean.PokemonIndexBean
 import com.lixd.pokemon.data.repository.PokemonRepository
 import com.lixd.pokemon.events.UpdatePokemonAvatarEvent
 import com.lixd.pokemon.network.retrofit.RetrofitProvider
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
-import okhttp3.CertificatePinner
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 
@@ -27,7 +27,6 @@ class PokemonIndexViewModel(
         RetrofitProvider.pokemonService
     )
 ) : ViewModel() {
-
     init {
         EventBus.getDefault().register(this)
     }
@@ -37,28 +36,46 @@ class PokemonIndexViewModel(
         EventBus.getDefault().unregister(this)
     }
 
-    val viewStatus = MutableStateFlow(PokemonIndexState())
+    //UI状态
+    private val _viewState = MutableStateFlow(PokemonIndexState())
+    val viewState = _viewState.asStateFlow()
 
-    fun updateSelectedIndex(index: Int, bean: PokemonIndexBean) {
-        viewStatus.update { it.copy(currentIndex = index, currentPokemonIndexBean = bean) }
+    //一次性事件，例如toast
+    private val _viewEvent = Channel<PokemonIndexEvent>(Channel.BUFFERED)
+    val viewEvent = _viewEvent.receiveAsFlow()
+
+    fun onAction(action: PokemonIndexAction) {
+        when (action) {
+            is PokemonIndexAction.UpdateSelectedIndex -> {
+                _viewState.update {
+                    it.copy(
+                        currentIndex = action.index,
+                        currentPokemonIndexBean = action.data
+                    )
+                }
+            }
+
+            is PokemonIndexAction.UpdateCount -> {
+                _viewState.update { it.copy(totalCount = action.count) }
+            }
+
+            is PokemonIndexAction.FirstSelectFinish -> {
+                _viewState.update { it.copy(firstSelect = true) }
+            }
+        }
     }
-
-    fun updateTotalCount(totalCount: Int) {
-        viewStatus.update { it.copy(totalCount = totalCount) }
-    }
-
 
     @Subscribe
     fun onUpdatePokemonAvatarEvent(event: UpdatePokemonAvatarEvent) {
         Log.d("Events", "[onUpdatePokemonAvatarEvent]:${event}")
-        if (event.id == viewStatus.value.currentPokemonIndexBean?.number && viewStatus.value.currentPokemonIndexBean?.avatar?.isEmpty() == true) {
+        if (event.id == viewState.value.currentPokemonIndexBean?.number && viewState.value.currentPokemonIndexBean?.avatar?.isEmpty() == true) {
             Log.d("Events", "[onUpdatePokemonAvatarEvent]update avatar")
             //更新列表头像
             modificationEvents.value += PagingDataEvents.Edit(event.id, event.avatar)
             //更新选中头像
             val newCurrentPokemonIndexBean =
-                viewStatus.value.currentPokemonIndexBean?.copy(avatar = event.avatar)
-            viewStatus.update { it.copy(currentPokemonIndexBean = newCurrentPokemonIndexBean) }
+                viewState.value.currentPokemonIndexBean?.copy(avatar = event.avatar)
+            _viewState.update { it.copy(currentPokemonIndexBean = newCurrentPokemonIndexBean) }
         }
     }
 
@@ -69,7 +86,7 @@ class PokemonIndexViewModel(
             config = PagingConfig(pageSize = 20, initialLoadSize = 20),
             pagingSourceFactory = {
                 PokemonIndexPagerSource(pokemonRepository, onTotalSize = {
-                    updateTotalCount(it)
+                    onAction(PokemonIndexAction.UpdateCount(it))
                 })
             })
             .flow.cachedIn(viewModelScope)

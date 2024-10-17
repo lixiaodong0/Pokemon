@@ -26,49 +26,34 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.center
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.PointMode
-import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.drawscope.clipRect
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
-import coil.Coil
 import coil.compose.AsyncImage
 import com.lixd.pokemon.data.bean.PokemonIndexBean
 import com.lixd.pokemon.navigation.PokemonDescriptionRoute
@@ -85,14 +70,19 @@ fun PokemonIndexScreen(
 ) {
     val lazyItems = viewModel.getPokemonIndex.collectAsLazyPagingItems()
     val lazyListState = rememberLazyListState()
-    val viewStatus by viewModel.viewStatus.collectAsStateWithLifecycle()
+    val viewState by viewModel.viewState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
 
-    var firstLoadSelect by rememberSaveable {
-        mutableStateOf(false)
+    LaunchedEffect(Unit) {
+        viewModel.viewEvent.collect {
+            when (it) {
+                is PokemonIndexEvent.Toast -> {
+                    Toast.makeText(context, it.msg, Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
     }
-    Coil
 
     Column(Modifier.fillMaxSize()) {
         Box(modifier = Modifier
@@ -127,30 +117,30 @@ fun PokemonIndexScreen(
                     .fillMaxWidth(0.5f)
                     .align(Alignment.CenterEnd),
                 datas = lazyItems,
-                currentIndex = viewStatus.currentIndex,
+                currentIndex = viewState.currentIndex,
                 state = lazyListState,
             ) { index, item ->
-                if (viewStatus.currentIndex == index) {
+                if (viewState.currentIndex == index) {
                     navController.navigate("${PokemonDescriptionRoute}/${item.number}") {
                         launchSingleTop = true
                     }
                 }
-                viewModel.updateSelectedIndex(index, item)
+                viewModel.onAction(PokemonIndexAction.UpdateSelectedIndex(index, item))
             }
             PokemonImageContainer(
                 modifier = Modifier
                     .fillMaxWidth(0.5f)
                     .align(Alignment.CenterStart),
-                data = viewStatus.currentPokemonIndexBean
+                data = viewState.currentPokemonIndexBean
             )
-            IndexTopBarContainer(viewStatus.totalCount)
+            IndexTopBarContainer(viewState.totalCount)
         }
         PokeBottomBar(content = {
             ImageKeyWidget(image = Icons.Default.KeyboardArrowUp, desc = "Previous") {
-                val index = viewStatus.currentIndex - 1
+                val index = viewState.currentIndex - 1
                 try {
                     val item = lazyItems[index]
-                    viewModel.updateSelectedIndex(index, item!!)
+                    viewModel.onAction(PokemonIndexAction.UpdateSelectedIndex(index, item!!))
                     coroutineScope.launch {
                         lazyListState.scrollToItem(index)
                     }
@@ -160,10 +150,10 @@ fun PokemonIndexScreen(
             }
             Spacer(modifier = Modifier.size(16.dp))
             ImageKeyWidget(image = Icons.Default.KeyboardArrowDown, desc = "Next") {
-                val index = viewStatus.currentIndex + 1
+                val index = viewState.currentIndex + 1
                 try {
                     val item = lazyItems[index]
-                    viewModel.updateSelectedIndex(index, item!!)
+                    viewModel.onAction(PokemonIndexAction.UpdateSelectedIndex(index, item!!))
                     coroutineScope.launch {
                         lazyListState.animateScrollToItem(index)
 //                        lazyListState.scrollToItem(index)
@@ -175,7 +165,7 @@ fun PokemonIndexScreen(
             Spacer(modifier = Modifier.size(16.dp))
             NumberKeyWidget(key = "A", desc = "See Details") {
                 try {
-                    lazyItems[viewStatus.currentIndex]?.let {
+                    lazyItems[viewState.currentIndex]?.let {
                         navController.navigate("${PokemonDescriptionRoute}/${it.number}") {
                             launchSingleTop = true
                         }
@@ -191,15 +181,15 @@ fun PokemonIndexScreen(
     }
 
     //首次加载选中逻辑
-    if (!firstLoadSelect) {
+    if (!viewState.firstSelect) {
         if (lazyItems.loadState.refresh is LoadState.NotLoading) {
             if (lazyItems.itemCount > 0) {
-                firstLoadSelect = true
-                Log.d("lixd","首次加载选中了...")
-                val index = viewStatus.currentIndex
+                viewModel.onAction(PokemonIndexAction.FirstSelectFinish)
+                Log.d("lixd", "首次加载选中了...")
+                val index = viewState.currentIndex
                 try {
                     val item = lazyItems[index]
-                    viewModel.updateSelectedIndex(index, item!!)
+                    viewModel.onAction(PokemonIndexAction.UpdateSelectedIndex(index, item!!))
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }

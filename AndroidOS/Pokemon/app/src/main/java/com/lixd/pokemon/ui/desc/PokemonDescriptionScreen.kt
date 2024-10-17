@@ -1,7 +1,6 @@
 package com.lixd.pokemon.ui.desc
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,11 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.ArrowBack
-import androidx.compose.material.icons.rounded.ArrowDropDown
-import androidx.compose.material.icons.rounded.KeyboardArrowLeft
 import androidx.compose.material.icons.rounded.PlayArrow
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -28,17 +23,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.center
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -59,14 +51,11 @@ fun PokemonDescriptionScreen(
     navController: NavHostController = rememberNavController(),
     pokemonId: Int = 0
 ) {
-    val viewStatus by viewModel.viewStatus.collectAsStateWithLifecycle()
-    var tabSelectedIndex by remember {
-        mutableIntStateOf(0)
-    }
+    val viewState by viewModel.viewState.collectAsStateWithLifecycle()
 
-    LaunchedEffect(key1 = null, block = {
-        viewModel.getPokemon(pokemonId)
-    })
+    LaunchedEffect(Unit) {
+        viewModel.onAction(PokemonDescriptionAction.GetPokemonData(pokemonId))
+    }
 
     val topBarHeight = 40.dp
     //第一层
@@ -105,30 +94,32 @@ fun PokemonDescriptionScreen(
             modifier = Modifier
                 .fillMaxWidth(0.5f)
                 .padding(top = topBarHeight),
-            tabSelectedIndex = tabSelectedIndex,
-            data = viewStatus.data,
-            ability = viewStatus.ability
+            tabSelectedIndex = viewState.currentTabIndex,
+            data = viewState.data,
+            ability = viewState.ability
         )
         TopTabIndicator(
             Modifier
                 .height(topBarHeight)
                 .fillMaxWidth(0.5f),
-            tabSelectedIndex,
+            viewState.currentTabIndex,
             onBack = {
-                tabSelectedIndex = if (tabSelectedIndex - 1 < 0) 0 else tabSelectedIndex - 1
+                val newTabIndex = if (viewState.currentTabIndex - 1 < 0) 0 else viewState.currentTabIndex - 1
+                viewModel.onAction(PokemonDescriptionAction.UpdateTabIndex(newTabIndex))
             },
             onNext = {
-                tabSelectedIndex = if (tabSelectedIndex + 1 > 2) 2 else tabSelectedIndex + 1
+                val newTabIndex =  if (viewState.currentTabIndex + 1 > 2) 2 else viewState.currentTabIndex + 1
+                viewModel.onAction(PokemonDescriptionAction.UpdateTabIndex(newTabIndex))
             }
         ) {
-            tabSelectedIndex = it
+            viewModel.onAction(PokemonDescriptionAction.UpdateTabIndex(it))
         }
         RightContent(
             modifier = Modifier
                 .fillMaxWidth(0.5f)
                 .fillMaxSize()
                 .align(Alignment.CenterEnd),
-            data = viewStatus.data
+            data = viewState.data
         )
     }
 }
