@@ -90,4 +90,9 @@ dependencies {
     implementation("androidx.room:room-runtime:$room_version")
     implementation("androidx.room:room-ktx:$room_version")
     ksp("androidx.room:room-compiler:$room_version")
+
+
+    //EventBus
+    val eventbus_version = "3.3.1"
+    implementation("org.greenrobot:eventbus:$eventbus_version")
 }
