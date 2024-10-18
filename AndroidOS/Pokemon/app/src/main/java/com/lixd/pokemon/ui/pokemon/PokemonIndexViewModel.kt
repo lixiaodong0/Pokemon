@@ -73,9 +73,11 @@ class PokemonIndexViewModel(
             //更新列表头像
             modificationEvents.value += PagingDataEvents.Edit(event.id, event.avatar)
             //更新选中头像
-            val newCurrentPokemonIndexBean =
-                viewState.value.currentPokemonIndexBean?.copy(avatar = event.avatar)
-            _viewState.update { it.copy(currentPokemonIndexBean = newCurrentPokemonIndexBean) }
+            if (viewState.value.currentPokemonIndexBean?.number == event.id) {
+                val newCurrentPokemonIndexBean =
+                    viewState.value.currentPokemonIndexBean?.copy(avatar = event.avatar)
+                _viewState.update { it.copy(currentPokemonIndexBean = newCurrentPokemonIndexBean) }
+            }
         }
     }
 

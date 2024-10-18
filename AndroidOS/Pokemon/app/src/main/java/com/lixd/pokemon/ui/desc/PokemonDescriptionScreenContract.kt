@@ -9,10 +9,20 @@ data class PokemonDescriptionState(
     val data: PokemonBean? = null,
     val ability: AbilityDetailBean? = null,
     val currentTabIndex: Int = 0,
+    val isNext: Boolean = false,
+    val isPrevious: Boolean = false,
 )
 
 //UI动作
 sealed class PokemonDescriptionAction {
+    class SetPokemonList(
+        val data: List<PokemonIndexBean>,
+    ) :
+        PokemonDescriptionAction()
+
+    data object Previous : PokemonDescriptionAction()
+    data object Next : PokemonDescriptionAction()
+
     class GetPokemonData(val id: Int) : PokemonDescriptionAction()
     class UpdateTabIndex(val tabIndex: Int) : PokemonDescriptionAction()
 }

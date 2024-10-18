@@ -5,6 +5,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import com.lixd.pokemon.navigation.SelfNavHost
 
@@ -16,16 +17,16 @@ fun PokemonApp() {
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PokemonScreen(modifier: Modifier = Modifier) {
+fun PokemonScreen(modifier: Modifier = Modifier, shareViewModel: ShareViewModel = viewModel()) {
     Scaffold(modifier, topBar = { SelfAppTopBar() }, bottomBar = { SelfAppBottomBar() }) {
-        SelfAppContent()
+        SelfAppContent(shareViewModel)
     }
 }
 
 @Composable
-fun SelfAppContent() {
+fun SelfAppContent(shareViewModel: ShareViewModel = viewModel()) {
     val navController = rememberNavController()
-    SelfNavHost(navController = navController)
+    SelfNavHost(navController = navController,shareViewModel = shareViewModel)
 }
 
 @Composable

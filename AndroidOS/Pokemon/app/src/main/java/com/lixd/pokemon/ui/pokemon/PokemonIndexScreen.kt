@@ -26,6 +26,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -40,8 +41,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.center
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.clipRect
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -57,6 +60,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import com.lixd.pokemon.data.bean.PokemonIndexBean
 import com.lixd.pokemon.navigation.PokemonDescriptionRoute
+import com.lixd.pokemon.ui.ShareViewModel
 import com.lixd.pokemon.ui.widget.ImageKeyWidget
 import com.lixd.pokemon.ui.widget.NumberKeyWidget
 import com.lixd.pokemon.ui.widget.PokeBallIcon
@@ -65,6 +69,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun PokemonIndexScreen(
+    shareViewModel: ShareViewModel,
     viewModel: PokemonIndexViewModel = viewModel(),
     navController: NavHostController,
 ) {
@@ -73,7 +78,6 @@ fun PokemonIndexScreen(
     val viewState by viewModel.viewState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
-
     LaunchedEffect(Unit) {
         viewModel.viewEvent.collect {
             when (it) {
@@ -123,6 +127,7 @@ fun PokemonIndexScreen(
                 state = lazyListState,
             ) { index, item ->
                 if (viewState.currentIndex == index) {
+                    shareViewModel.updatePokemonIndexList(lazyItems.itemSnapshotList.items)
                     navController.navigate("${PokemonDescriptionRoute}/${item.number}") {
                         launchSingleTop = true
                     }
@@ -168,6 +173,7 @@ fun PokemonIndexScreen(
             NumberKeyWidget(key = "A", desc = "See Details") {
                 try {
                     lazyItems[viewState.currentIndex]?.let {
+                        shareViewModel.updatePokemonIndexList(lazyItems.itemSnapshotList.items)
                         navController.navigate("${PokemonDescriptionRoute}/${it.number}") {
                             launchSingleTop = true
                         }

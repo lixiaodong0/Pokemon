@@ -1,5 +1,7 @@
 package com.lixd.pokemon.ui.desc
 
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -13,8 +15,17 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.rounded.KeyboardArrowDown
+import androidx.compose.material.icons.rounded.KeyboardArrowUp
 import androidx.compose.material.icons.rounded.PlayArrow
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -24,14 +35,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -39,24 +53,40 @@ import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import com.lixd.pokemon.data.bean.AbilityDetailBean
 import com.lixd.pokemon.data.bean.PokemonBean
+import com.lixd.pokemon.ui.ShareViewModel
 import com.lixd.pokemon.ui.desc.info.PokemonInfoCardContainer
 import com.lixd.pokemon.ui.desc.info.PokemonMoveCardContainer
 import com.lixd.pokemon.ui.desc.info.PokemonStatsCardContainer
+import com.lixd.pokemon.ui.pokemon.PokemonIndexAction
+import com.lixd.pokemon.ui.widget.ImageKeyWidget
 import com.lixd.pokemon.ui.widget.PokeBallIcon
 import com.lixd.pokemon.ui.widget.PokeBottomBar
 import com.lixd.pokemon.ui.widget.PokeMovesIcon
 import com.lixd.pokemon.ui.widget.PokeStatsIcon
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 @Composable
 fun PokemonDescriptionScreen(
+    shareViewModel: ShareViewModel,
     viewModel: PokemonDescriptionViewModel = viewModel(),
     navController: NavHostController = rememberNavController(),
     pokemonId: Int = 0
 ) {
     val viewState by viewModel.viewState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
 
     LaunchedEffect(Unit) {
+        viewModel.onAction(PokemonDescriptionAction.SetPokemonList(shareViewModel.pokemonIndexState.value))
         viewModel.onAction(PokemonDescriptionAction.GetPokemonData(pokemonId))
+
+        viewModel.viewEvent.collect {
+            when (it) {
+                is PokemonDescriptionEvent.Toast -> {
+                    Toast.makeText(context, it.msg, Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
     }
 
     val topBarHeight = 40.dp
@@ -124,6 +154,13 @@ fun PokemonDescriptionScreen(
             ) {
                 viewModel.onAction(PokemonDescriptionAction.UpdateTabIndex(it))
             }
+//            TopSwitchContainer(
+//                modifier = Modifier
+//                    .fillMaxWidth(0.5f)
+//                    .padding(start = 15.dp)
+//                    .wrapContentSize()
+//                    .align(Alignment.TopEnd),
+//            )
             RightContent(
                 modifier = Modifier
                     .fillMaxWidth(0.5f)
@@ -132,7 +169,28 @@ fun PokemonDescriptionScreen(
                 data = viewState.data
             )
         }
-        PokeBottomBar() {
+        PokeBottomBar(content = {
+            ImageKeyWidget(image = Icons.Default.KeyboardArrowLeft, desc = "See Info") {
+                val newTabIndex =
+                    if (viewState.currentTabIndex - 1 < 0) 0 else viewState.currentTabIndex - 1
+                viewModel.onAction(PokemonDescriptionAction.UpdateTabIndex(newTabIndex))
+            }
+            Spacer(modifier = Modifier.size(16.dp))
+            ImageKeyWidget(image = Icons.Default.KeyboardArrowRight, desc = "See Info") {
+                val newTabIndex =
+                    if (viewState.currentTabIndex + 1 > 2) 2 else viewState.currentTabIndex + 1
+                viewModel.onAction(PokemonDescriptionAction.UpdateTabIndex(newTabIndex))
+            }
+            Spacer(modifier = Modifier.size(16.dp))
+
+            ImageKeyWidget(image = Icons.Default.KeyboardArrowUp, desc = "Previous") {
+                viewModel.onAction(PokemonDescriptionAction.Previous)
+            }
+            Spacer(modifier = Modifier.size(16.dp))
+            ImageKeyWidget(image = Icons.Default.KeyboardArrowDown, desc = "Next") {
+                viewModel.onAction(PokemonDescriptionAction.Next)
+            }
+        }) {
             navController.popBackStack()
         }
     }
@@ -167,6 +225,59 @@ fun LeftContent(
                 PokemonMoveCardContainer(data.moves ?: emptyList())
             }
         }
+    }
+}
+
+@Composable
+fun TopSwitchContainer(modifier: Modifier = Modifier) {
+    Column(modifier = modifier.graphicsLayer {
+        translationY = -5.dp.toPx()
+    }) {
+        Image(
+            painter = rememberVectorPainter(image = Icons.Rounded.KeyboardArrowUp),
+            modifier = Modifier
+                .padding(start = 15.dp)
+                .size(20.dp)
+                .graphicsLayer {
+                    translationY = 5.dp.toPx()
+                },
+            contentDescription = "",
+            colorFilter = ColorFilter.tint(Color(0xffe2323f))
+        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(30.dp)
+                .drawWithCache {
+                    val path = Path().apply {
+                        moveTo(0f, size.height)
+                        lineTo(12.dp.toPx(), 0f)
+                        lineTo(size.width, 0f)
+                        lineTo(size.width, size.height)
+                        close()
+                    }
+                    onDrawBehind {
+                        drawPath(path, Color.Black)
+                    }
+                },
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Spacer(modifier = Modifier.size(15.dp))
+            PokeBallIcon()
+            Spacer(modifier = Modifier.size(30.dp))
+            Text(text = "哈哈哈", color = Color.White, fontSize = 16.sp)
+        }
+        Image(
+            painter = rememberVectorPainter(image = Icons.Rounded.KeyboardArrowDown),
+            modifier = Modifier
+                .padding(start = 15.dp)
+                .size(20.dp)
+                .graphicsLayer {
+                    translationY = -5.dp.toPx()
+                },
+            contentDescription = "",
+            colorFilter = ColorFilter.tint(Color(0xffe2323f))
+        )
     }
 }
 
@@ -257,7 +368,8 @@ fun RightContent(modifier: Modifier, data: PokemonBean?) {
 @Preview(widthDp = 640, heightDp = 360)
 @Composable
 fun PokemonDescriptionScreenPreview() {
-    PokemonDescriptionScreen()
+//    PokemonDescriptionScreen()
+    TopSwitchContainer()
 }
 
 
