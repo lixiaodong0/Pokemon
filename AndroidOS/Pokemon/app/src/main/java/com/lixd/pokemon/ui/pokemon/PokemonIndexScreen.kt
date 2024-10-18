@@ -80,6 +80,8 @@ fun PokemonIndexScreen(
                 is PokemonIndexEvent.Toast -> {
                     Toast.makeText(context, it.msg, Toast.LENGTH_SHORT).show()
                 }
+
+                else -> {}
             }
         }
     }

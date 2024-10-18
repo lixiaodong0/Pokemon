@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -42,6 +43,7 @@ import com.lixd.pokemon.ui.desc.info.PokemonInfoCardContainer
 import com.lixd.pokemon.ui.desc.info.PokemonMoveCardContainer
 import com.lixd.pokemon.ui.desc.info.PokemonStatsCardContainer
 import com.lixd.pokemon.ui.widget.PokeBallIcon
+import com.lixd.pokemon.ui.widget.PokeBottomBar
 import com.lixd.pokemon.ui.widget.PokeMovesIcon
 import com.lixd.pokemon.ui.widget.PokeStatsIcon
 
@@ -64,63 +66,75 @@ fun PokemonDescriptionScreen(
     val levelTwoBackColor = Color(0xffe2323f)
     //第三层
     val levelThreeBackColor = Color(0xffc32b38)
-    Box(modifier = Modifier
-        .fillMaxSize()
-        .drawBehind {
-            val endX = size.width * 0.5f
-            val offset = endX / 3
-            //第一层背景
-            drawRect(levelOneBackColor)
-            //第二层背景
-            val path = Path().apply {
-                moveTo(0f, 0f)
-                lineTo(endX, 0f)
-                lineTo(endX - offset, size.height)
-                lineTo(0f, size.height)
-                close()
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
+        Box(modifier = Modifier
+            .fillMaxWidth()
+            .weight(1f, true)
+            .drawBehind {
+                val endX = size.width * 0.5f
+                val offset = endX / 3
+                //第一层背景
+                drawRect(levelOneBackColor)
+                //第二层背景
+                val path = Path().apply {
+                    moveTo(0f, 0f)
+                    lineTo(endX, 0f)
+                    lineTo(endX - offset, size.height)
+                    lineTo(0f, size.height)
+                    close()
+                }
+                drawPath(path, levelTwoBackColor)
+                //第三层背景
+                val path2 = Path().apply {
+                    moveTo(endX - offset, 0f)
+                    lineTo(endX, 0f)
+                    lineTo(endX - offset, size.height)
+                    lineTo(endX - offset * 2, size.height)
+                    close()
+                }
+                drawPath(path2, levelThreeBackColor)
+            }) {
+            LeftContent(
+                modifier = Modifier
+                    .fillMaxWidth(0.5f)
+                    .padding(top = topBarHeight),
+                tabSelectedIndex = viewState.currentTabIndex,
+                data = viewState.data,
+                ability = viewState.ability
+            )
+            TopTabIndicator(
+                Modifier
+                    .height(topBarHeight)
+                    .fillMaxWidth(0.5f),
+                viewState.currentTabIndex,
+                onBack = {
+                    val newTabIndex =
+                        if (viewState.currentTabIndex - 1 < 0) 0 else viewState.currentTabIndex - 1
+                    viewModel.onAction(PokemonDescriptionAction.UpdateTabIndex(newTabIndex))
+                },
+                onNext = {
+                    val newTabIndex =
+                        if (viewState.currentTabIndex + 1 > 2) 2 else viewState.currentTabIndex + 1
+                    viewModel.onAction(PokemonDescriptionAction.UpdateTabIndex(newTabIndex))
+                }
+            ) {
+                viewModel.onAction(PokemonDescriptionAction.UpdateTabIndex(it))
             }
-            drawPath(path, levelTwoBackColor)
-            //第三层背景
-            val path2 = Path().apply {
-                moveTo(endX - offset, 0f)
-                lineTo(endX, 0f)
-                lineTo(endX - offset, size.height)
-                lineTo(endX - offset * 2, size.height)
-                close()
-            }
-            drawPath(path2, levelThreeBackColor)
-        }) {
-        LeftContent(
-            modifier = Modifier
-                .fillMaxWidth(0.5f)
-                .padding(top = topBarHeight),
-            tabSelectedIndex = viewState.currentTabIndex,
-            data = viewState.data,
-            ability = viewState.ability
-        )
-        TopTabIndicator(
-            Modifier
-                .height(topBarHeight)
-                .fillMaxWidth(0.5f),
-            viewState.currentTabIndex,
-            onBack = {
-                val newTabIndex = if (viewState.currentTabIndex - 1 < 0) 0 else viewState.currentTabIndex - 1
-                viewModel.onAction(PokemonDescriptionAction.UpdateTabIndex(newTabIndex))
-            },
-            onNext = {
-                val newTabIndex =  if (viewState.currentTabIndex + 1 > 2) 2 else viewState.currentTabIndex + 1
-                viewModel.onAction(PokemonDescriptionAction.UpdateTabIndex(newTabIndex))
-            }
-        ) {
-            viewModel.onAction(PokemonDescriptionAction.UpdateTabIndex(it))
+            RightContent(
+                modifier = Modifier
+                    .fillMaxWidth(0.5f)
+                    .fillMaxSize()
+                    .align(Alignment.CenterEnd),
+                data = viewState.data
+            )
         }
-        RightContent(
-            modifier = Modifier
-                .fillMaxWidth(0.5f)
-                .fillMaxSize()
-                .align(Alignment.CenterEnd),
-            data = viewState.data
-        )
+        PokeBottomBar() {
+            navController.popBackStack()
+        }
     }
 }
 

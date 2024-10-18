@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -34,6 +36,7 @@ fun PokemonStatsCardContainer(
     stats: List<StatsBean>,
     ability: AbilityDetailBean?
 ) {
+    val scrollState = rememberScrollState()
     val drawData = stats.map {
         DrawData(it.stat.name, "${it.baseStat}", (it.baseStat / 100f).coerceAtMost(100f))
     }
@@ -49,7 +52,7 @@ fun PokemonStatsCardContainer(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(Color.White)
-                    .height(200.dp)
+                    .height(180.dp)
             ) {
                 Spacer(
                     modifier = Modifier
@@ -99,6 +102,7 @@ fun PokemonStatsCardContainer(
                         fontSize = 12.sp,
                         modifier = Modifier
                             .fillMaxWidth()
+                            .verticalScroll(scrollState)
                             .padding(16.dp)
                     )
                 }
