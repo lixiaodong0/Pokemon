@@ -56,6 +56,8 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.3")
     implementation("androidx.activity:activity-compose:1.8.0")
     implementation(platform("androidx.compose:compose-bom:2023.03.00"))
+    //共享元素动画
+    implementation("androidx.compose.animation:animation:1.7.0-beta06")
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
@@ -70,7 +72,6 @@ dependencies {
 
     implementation("androidx.navigation:navigation-compose:2.8.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.0")
-
 
     implementation("io.coil-kt:coil:2.6.0")
     implementation("io.coil-kt:coil-compose:2.6.0")
@@ -95,4 +96,6 @@ dependencies {
     //EventBus
     val eventbus_version = "3.3.1"
     implementation("org.greenrobot:eventbus:$eventbus_version")
+
+
 }
