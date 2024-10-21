@@ -54,6 +54,8 @@ import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import com.lixd.pokemon.data.bean.AbilityDetailBean
 import com.lixd.pokemon.data.bean.PokemonBean
+import com.lixd.pokemon.ui.LocalNavController
+import com.lixd.pokemon.ui.LocalShareViewModel
 import com.lixd.pokemon.ui.ShareViewModel
 import com.lixd.pokemon.ui.desc.info.PokemonInfoCardContainer
 import com.lixd.pokemon.ui.desc.info.PokemonMoveCardContainer
@@ -69,13 +71,13 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun PokemonDescriptionScreen(
-    shareViewModel: ShareViewModel,
     viewModel: PokemonDescriptionViewModel = viewModel(),
-    navController: NavHostController = rememberNavController(),
     pokemonId: Int = 0
 ) {
     val viewState by viewModel.viewState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val navController = LocalNavController.current
+    val shareViewModel = LocalShareViewModel.current
 
     LaunchedEffect(Unit) {
         viewModel.onAction(PokemonDescriptionAction.SetPokemonList(shareViewModel.pokemonIndexState.value))

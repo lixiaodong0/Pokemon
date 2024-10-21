@@ -60,6 +60,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import com.lixd.pokemon.data.bean.PokemonIndexBean
 import com.lixd.pokemon.navigation.PokemonDescriptionRoute
+import com.lixd.pokemon.ui.LocalShareViewModel
 import com.lixd.pokemon.ui.ShareViewModel
 import com.lixd.pokemon.ui.widget.ImageKeyWidget
 import com.lixd.pokemon.ui.widget.NumberKeyWidget
@@ -69,7 +70,6 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun PokemonIndexScreen(
-    shareViewModel: ShareViewModel,
     viewModel: PokemonIndexViewModel = viewModel(),
     navController: NavHostController,
 ) {
@@ -78,6 +78,7 @@ fun PokemonIndexScreen(
     val viewState by viewModel.viewState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
+    val shareViewModel = LocalShareViewModel.current
     LaunchedEffect(Unit) {
         viewModel.viewEvent.collect {
             when (it) {

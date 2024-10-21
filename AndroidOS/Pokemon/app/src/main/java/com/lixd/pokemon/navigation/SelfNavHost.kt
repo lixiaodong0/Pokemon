@@ -15,22 +15,19 @@ import com.lixd.pokemon.ui.pokemon.PokemonIndexScreen
 
 @Composable
 fun SelfNavHost(navController: NavHostController, shareViewModel: ShareViewModel) {
-
     NavHost(navController = navController, startDestination = PokemonIndexRoute) {
         composable(HomeRoute) {
             HomeScreen()
         }
         composable(PokemonIndexRoute) {
-            PokemonIndexScreen(navController = navController, shareViewModel = shareViewModel)
+            PokemonIndexScreen(navController = navController)
         }
         composable("${PokemonDescriptionRoute}/{id}", arguments = listOf(
             navArgument("id") { type = NavType.IntType }
         )) {
             val pokemonId = it.arguments?.getInt("id") ?: 0
             PokemonDescriptionScreen(
-                navController = navController,
                 pokemonId = pokemonId,
-                shareViewModel = shareViewModel
             )
         }
         composable(PropsRoute) {
