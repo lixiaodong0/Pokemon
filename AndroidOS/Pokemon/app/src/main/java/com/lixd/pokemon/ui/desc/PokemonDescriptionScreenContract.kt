@@ -9,8 +9,9 @@ data class PokemonDescriptionState(
     val data: PokemonBean? = null,
     val ability: AbilityDetailBean? = null,
     val currentTabIndex: Int = 0,
-    val isNext: Boolean = false,
-    val isPrevious: Boolean = false,
+    val canNext: Boolean = false,
+    val canPrevious: Boolean = false,
+    val currentName: String = "",
 )
 
 //UI动作

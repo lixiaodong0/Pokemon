@@ -109,6 +109,7 @@ class PokemonDescriptionViewModel(
 
     private fun getPokemon(id: Int) {
         currentId = id
+        calculateCurrentIndicator()
         viewModelScope.launch(Dispatchers.IO) {
             runCatching {
                 pokemonRepository.getPokemon(id)
@@ -126,6 +127,22 @@ class PokemonDescriptionViewModel(
 
             }.onFailure {
                 it.printStackTrace()
+            }
+        }
+    }
+
+    private fun calculateCurrentIndicator() {
+        val currentIndex = currentIndex()
+        if (currentIndex != -1) {
+            val canNext = currentIndex + 1 < pokemonList.size
+            val canPrevious = currentIndex - 1 >= 0
+            val currentBean = pokemonList[currentIndex]
+            _viewState.update {
+                it.copy(
+                    canNext = canNext,
+                    canPrevious = canPrevious,
+                    currentName = currentBean.name
+                )
             }
         }
     }

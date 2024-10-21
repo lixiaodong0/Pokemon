@@ -34,6 +34,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Color
@@ -90,6 +91,8 @@ fun PokemonDescriptionScreen(
     }
 
     val topBarHeight = 40.dp
+    val topBarMargin = 10.dp
+
     //第一层
     val levelOneBackColor = Color(0xfffef5fe)
     //第二层
@@ -131,13 +134,14 @@ fun PokemonDescriptionScreen(
             LeftContent(
                 modifier = Modifier
                     .fillMaxWidth(0.5f)
-                    .padding(top = topBarHeight),
+                    .padding(top = topBarHeight + topBarMargin),
                 tabSelectedIndex = viewState.currentTabIndex,
                 data = viewState.data,
                 ability = viewState.ability
             )
             TopTabIndicator(
                 Modifier
+                    .padding(top = topBarMargin)
                     .height(topBarHeight)
                     .fillMaxWidth(0.5f),
                 viewState.currentTabIndex,
@@ -154,13 +158,16 @@ fun PokemonDescriptionScreen(
             ) {
                 viewModel.onAction(PokemonDescriptionAction.UpdateTabIndex(it))
             }
-//            TopSwitchContainer(
-//                modifier = Modifier
-//                    .fillMaxWidth(0.5f)
-//                    .padding(start = 15.dp)
-//                    .wrapContentSize()
-//                    .align(Alignment.TopEnd),
-//            )
+            TopSwitchContainer(
+                modifier = Modifier
+                    .fillMaxWidth(0.5f)
+                    .padding(start = 15.dp)
+                    .wrapContentSize()
+                    .align(Alignment.TopEnd),
+                currentName = viewState.currentName,
+                canNext = viewState.canNext,
+                canPrevious = viewState.canPrevious,
+            )
             RightContent(
                 modifier = Modifier
                     .fillMaxWidth(0.5f)
@@ -229,7 +236,12 @@ fun LeftContent(
 }
 
 @Composable
-fun TopSwitchContainer(modifier: Modifier = Modifier) {
+fun TopSwitchContainer(
+    modifier: Modifier = Modifier,
+    currentName: String = "",
+    canNext: Boolean = true,
+    canPrevious: Boolean = true,
+) {
     Column(modifier = modifier.graphicsLayer {
         translationY = -5.dp.toPx()
     }) {
@@ -240,7 +252,8 @@ fun TopSwitchContainer(modifier: Modifier = Modifier) {
                 .size(20.dp)
                 .graphicsLayer {
                     translationY = 5.dp.toPx()
-                },
+                }
+                .alpha(if (canPrevious) 1f else 0f),
             contentDescription = "",
             colorFilter = ColorFilter.tint(Color(0xffe2323f))
         )
@@ -265,7 +278,7 @@ fun TopSwitchContainer(modifier: Modifier = Modifier) {
             Spacer(modifier = Modifier.size(15.dp))
             PokeBallIcon()
             Spacer(modifier = Modifier.size(30.dp))
-            Text(text = "哈哈哈", color = Color.White, fontSize = 16.sp)
+            Text(text = currentName, color = Color.White, fontSize = 16.sp)
         }
         Image(
             painter = rememberVectorPainter(image = Icons.Rounded.KeyboardArrowDown),
@@ -274,7 +287,8 @@ fun TopSwitchContainer(modifier: Modifier = Modifier) {
                 .size(20.dp)
                 .graphicsLayer {
                     translationY = -5.dp.toPx()
-                },
+                }
+                .alpha(if (canNext) 1f else 0f),
             contentDescription = "",
             colorFilter = ColorFilter.tint(Color(0xffe2323f))
         )
