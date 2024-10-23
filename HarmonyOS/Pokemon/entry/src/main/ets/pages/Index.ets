@@ -1,3 +1,5 @@
+import { router } from '@kit.ArkUI';
+
 @Entry
 @Component
 struct Index {
@@ -12,6 +14,9 @@ struct Index {
         .alignRules({
           center: { anchor: '__container__', align: VerticalAlign.Center },
           middle: { anchor: '__container__', align: HorizontalAlign.Center }
+        })
+        .onClick(() => {
+          router.pushNamedRoute({ name: "PokemonIndexScreen" })
         })
     }
     .height('100%')

@@ -1,11 +1,11 @@
-import PokemonIndexBean from '../model/PokemonIndexBean';
+import PokemonIndexBean from '../data/PokemonIndexBean';
 import sendableColorSpaceManager from '@ohos.graphics.sendableColorSpaceManager';
 
 @Component
 @Preview
 export default struct PokemonIndexItem {
-  @State data: PokemonIndexBean = new PokemonIndexBean();
-  @State selected: boolean = false;
+  @Prop data: PokemonIndexBean = new PokemonIndexBean();
+  @Prop selected: boolean = false;
   private settings: RenderingContextSettings = new RenderingContextSettings(true);
   private context: CanvasRenderingContext2D = new CanvasRenderingContext2D(this.settings);
 

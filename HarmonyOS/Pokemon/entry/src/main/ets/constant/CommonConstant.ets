@@ -1,3 +1,3 @@
-class CommonConstant {
+export default class CommonConstant {
   static readonly BASE_URL = "https://pokeapi.co/"
 }
