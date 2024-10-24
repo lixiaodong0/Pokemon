@@ -4,6 +4,7 @@ import PokemonIndexItem from '../view/PokemonIndexItem'
 import promptAction from '@ohos.promptAction';
 import PokemonIndexLayoutBackground from '../view/PokemonIndexLayoutBackground';
 import PokemonIndexTopBar from '../view/PokemonIndexTopBar';
+import { router } from '@kit.ArkUI';
 
 @Preview
 @Entry
@@ -49,7 +50,12 @@ struct PokemonIndexScreen {
                 if (this.currentIndex != index) {
                   this.currentIndex = index
                 } else {
-                  promptAction.showToast({ message: "跳转详情" + item.name })
+                  router.pushUrl({
+                    url: "pages/PokemonDescriptionScreen",
+                    params: {
+                      id: item.number
+                    }
+                  }, router.RouterMode.Standard)
                 }
               })
             }

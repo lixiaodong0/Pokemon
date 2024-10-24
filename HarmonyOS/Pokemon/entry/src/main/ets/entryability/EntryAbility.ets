@@ -1,6 +1,7 @@
 import { AbilityConstant, UIAbility, Want } from '@kit.AbilityKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { window } from '@kit.ArkUI';
+import AppContext from './AppContext';
 
 export default class EntryAbility extends UIAbility {
   onCreate(want: Want, launchParam: AbilityConstant.LaunchParam): void {
@@ -14,6 +15,11 @@ export default class EntryAbility extends UIAbility {
   onWindowStageCreate(windowStage: window.WindowStage): void {
     // Main window is created, set main page for this ability
     hilog.info(0x0000, 'testTag', '%{public}s', 'Ability onWindowStageCreate');
+
+    console.info("[onWindowStageCreate]context:" + this.context)
+    console.info("[onWindowStageCreate]filesDir:" + this.context.filesDir)
+    AppContext.getInstance().setContext(this.context)
+
 
     windowStage.loadContent('pages/PokemonIndexScreen', (err) => {
       if (err.code) {
