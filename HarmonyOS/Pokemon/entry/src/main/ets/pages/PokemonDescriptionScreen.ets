@@ -43,6 +43,12 @@ struct PokemonDescriptionScreen {
         killExperienceValue: this.pokemonData.base_experience + "",
         attributeValue: this.attributeValue
       })
+
+      Stack({ alignContent: Alignment.Bottom }) {
+        Button("返回").onClick(() => {
+          router.back()
+        })
+      }.width("100%").height("100%")
     }
   }
 }

@@ -2,6 +2,7 @@ import { AbilityConstant, UIAbility, Want } from '@kit.AbilityKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { window } from '@kit.ArkUI';
 import AppContext from './AppContext';
+import KVDBManager from '../db/KVDBManager';
 
 export default class EntryAbility extends UIAbility {
   onCreate(want: Want, launchParam: AbilityConstant.LaunchParam): void {
@@ -19,6 +20,7 @@ export default class EntryAbility extends UIAbility {
     console.info("[onWindowStageCreate]context:" + this.context)
     console.info("[onWindowStageCreate]filesDir:" + this.context.filesDir)
     AppContext.getInstance().setContext(this.context)
+    KVDBManager.getInstance().init(this.context)
 
 
     windowStage.loadContent('pages/PokemonIndexScreen', (err) => {

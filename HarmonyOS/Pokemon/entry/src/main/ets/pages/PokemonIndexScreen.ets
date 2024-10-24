@@ -5,6 +5,17 @@ import promptAction from '@ohos.promptAction';
 import PokemonIndexLayoutBackground from '../view/PokemonIndexLayoutBackground';
 import PokemonIndexTopBar from '../view/PokemonIndexTopBar';
 import { router } from '@kit.ArkUI';
+import { emitter } from '@kit.BasicServicesKit';
+import UpdateAvatarEvent from '../events/UpdateAvatarEvent';
+import { BusinessError, commonEventManager } from '@kit.BasicServicesKit';
+
+// 用于保存创建成功的订阅者对象，后续使用其完成订阅及退订的动作
+let subscriber: commonEventManager.CommonEventSubscriber | null = null;
+// 订阅者信息，其中的event字段需要替换为实际的事件名称。
+let subscribeInfo: commonEventManager.CommonEventSubscribeInfo = {
+  events: ['UpdateAvatarEvent'], // 订阅灭屏公共事件
+
+};
 
 @Preview
 @Entry
@@ -21,10 +32,40 @@ struct PokemonIndexScreen {
   aboutToAppear() {
     console.info('PokemonIndexScreen:' + "[aboutToAppear]");
     this.getPokemonList()
+
+    // 创建订阅者回调
+    commonEventManager.createSubscriber(subscribeInfo,
+      (err: BusinessError, data: commonEventManager.CommonEventSubscriber) => {
+        if (err) {
+          console.error(`Failed to create subscriber. Code is ${err.code}, message is ${err.message}`);
+          return;
+        }
+        console.info('Succeeded in creating subscriber.');
+        subscriber = data;
+
+        // 订阅公共事件回调
+        if (subscriber !== null) {
+          commonEventManager.subscribe(subscriber, (err: BusinessError, data: commonEventManager.CommonEventData) => {
+            if (err) {
+              console.error(`Failed to subscribe common event. Code is ${err.code}, message is ${err.message}`);
+              return;
+            }
+            // ...
+            console.info("[commonEventManager]收到更新头像事件:" + data.data)
+          })
+        } else {
+          console.error(`Need create subscriber`);
+        }
+      })
+
+    // emitter.on(UpdateAvatarEvent.event, (eventData: emitter.EventData) => {
+    //   console.info("收到更新头像事件:" + eventData.data)
+    // })
   }
 
   getPokemonList() {
     this.pokemonIndexViewModel.getPokemonList().then((data: PokemonIndexBean[]) => {
+      console.info(`key:` + "请求完成");
       this.pokemonIndexList = this.pokemonIndexList.concat(data)
       this.totalCount = this.pokemonIndexViewModel.totalCount
       this.loadingState = false
