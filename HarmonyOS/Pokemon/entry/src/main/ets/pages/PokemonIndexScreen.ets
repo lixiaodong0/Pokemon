@@ -5,17 +5,8 @@ import promptAction from '@ohos.promptAction';
 import PokemonIndexLayoutBackground from '../view/PokemonIndexLayoutBackground';
 import PokemonIndexTopBar from '../view/PokemonIndexTopBar';
 import { router } from '@kit.ArkUI';
-import { emitter } from '@kit.BasicServicesKit';
-import UpdateAvatarEvent from '../events/UpdateAvatarEvent';
-import { BusinessError, commonEventManager } from '@kit.BasicServicesKit';
-
-// 用于保存创建成功的订阅者对象，后续使用其完成订阅及退订的动作
-let subscriber: commonEventManager.CommonEventSubscriber | null = null;
-// 订阅者信息，其中的event字段需要替换为实际的事件名称。
-let subscribeInfo: commonEventManager.CommonEventSubscribeInfo = {
-  events: ['UpdateAvatarEvent'], // 订阅灭屏公共事件
-
-};
+import EasyEventBus from '../events/EasyEventBus'
+import KVDBManager from '../db/KVDBManager';
 
 @Preview
 @Entry
@@ -23,44 +14,20 @@ let subscribeInfo: commonEventManager.CommonEventSubscribeInfo = {
 struct PokemonIndexScreen {
   @State pokemonIndexList: Array<PokemonIndexBean> = []
   @State currentIndex: number = 0
+  @State currentAvatar: string = ""
   @State totalCount: number = 0
   preloadCount = 5
   loadingState: boolean = false
-  private url: string = "http://gips2.baidu.com/it/u=195724436,3554684702&fm=3028&app=3028&f=JPEG&fmt=auto?w=1280&h=960"
   private pokemonIndexViewModel: PokemonIndexViewModel = new PokemonIndexViewModel()
+  private onUpdateAvatarEvent = (avatar: string) => {
+    console.info('onUpdateAvatarEvent:' + "收到更新头像回调:" + avatar);
+    this.currentAvatar = avatar
+  }
 
   aboutToAppear() {
     console.info('PokemonIndexScreen:' + "[aboutToAppear]");
     this.getPokemonList()
-
-    // 创建订阅者回调
-    commonEventManager.createSubscriber(subscribeInfo,
-      (err: BusinessError, data: commonEventManager.CommonEventSubscriber) => {
-        if (err) {
-          console.error(`Failed to create subscriber. Code is ${err.code}, message is ${err.message}`);
-          return;
-        }
-        console.info('Succeeded in creating subscriber.');
-        subscriber = data;
-
-        // 订阅公共事件回调
-        if (subscriber !== null) {
-          commonEventManager.subscribe(subscriber, (err: BusinessError, data: commonEventManager.CommonEventData) => {
-            if (err) {
-              console.error(`Failed to subscribe common event. Code is ${err.code}, message is ${err.message}`);
-              return;
-            }
-            // ...
-            console.info("[commonEventManager]收到更新头像事件:" + data.data)
-          })
-        } else {
-          console.error(`Need create subscriber`);
-        }
-      })
-
-    // emitter.on(UpdateAvatarEvent.event, (eventData: emitter.EventData) => {
-    //   console.info("收到更新头像事件:" + eventData.data)
-    // })
+    EasyEventBus.getInstance().on("updateAvatarEvent", this.onUpdateAvatarEvent)
   }
 
   getPokemonList() {
@@ -79,9 +46,12 @@ struct PokemonIndexScreen {
       PokemonIndexLayoutBackground()
       PokemonIndexTopBar({ totalCount: this.totalCount })
       Row() {
-        Column() {
-          Image(this.url).width("80%").height("80%").objectFit(ImageFit.ScaleDown)
-        }.width("100%").height("100%").layoutWeight(1).justifyContent(FlexAlign.Center)
+        Stack({ alignContent: Alignment.Bottom }) {
+          Image(this.currentAvatar).width("80%").height("80%").objectFit(ImageFit.Contain)
+        }
+        .width("100%")
+        .height("100%")
+        .layoutWeight(1)
 
         List({ space: 16 }) {
           ForEach(this.pokemonIndexList, (item: PokemonIndexBean, index: number) => {

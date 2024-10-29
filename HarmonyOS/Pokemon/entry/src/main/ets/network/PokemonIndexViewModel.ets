@@ -40,7 +40,7 @@ export default class PokemonIndexViewModel {
         if (coverJson.length > 0) {
           spritesBean = JSON.parse(coverJson)
         }
-        let avatar = spritesBean.other?.officialArtwork?.frontDefault ?? ""
+        let avatar = spritesBean.other?.officialArtwork?.front_default ?? ""
         pokemonIndexBeanList.push(new PokemonIndexBean(num, item.name, avatar))
 
         console.info(`key:` + key);

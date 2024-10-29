@@ -3,6 +3,7 @@ import PokemonDescriptionViewModel from '../network/PokemonDescriptionViewModel'
 import PokemonDescriptionInfoCard from '../view/PokemonDescriptionInfoCard'
 import PokemonDescriptionLayoutBackground from '../view/PokemonDescriptionLayoutBackground'
 import { router } from '@kit.ArkUI'
+import { common } from '@kit.AbilityKit'
 
 
 class Params {

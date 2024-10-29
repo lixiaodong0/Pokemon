@@ -18,6 +18,7 @@ export default class KVDBManager {
   private kvStore: distributedKVStore.SingleKVStore | undefined = undefined;
 
   init(context: Context) {
+
     const kvManagerConfig: distributedKVStore.KVManagerConfig = {
       context: context,
       bundleName: 'com.lixd.pokemon.datamanager'
@@ -64,11 +65,18 @@ export default class KVDBManager {
     }
   }
 
+  isInit(): boolean {
+    if (this.kvStore == undefined) {
+      return false
+    }
+    return true
+  }
+
   async put(key: string, value: string): Promise<boolean> {
     let success: boolean = await new Promise((resolve: Function, reject: Function) => {
       if (this.kvStore == undefined) {
         console.error(`请先初始化kvStore`);
-        reject(new Error("请先初始化kvStore"))
+        resolve(false)
       } else {
         this.kvStore.put(key, value, (err) => {
           if (err !== undefined) {
@@ -88,7 +96,7 @@ export default class KVDBManager {
     let value: string = await new Promise((resolve: Function, reject: Function) => {
       if (this.kvStore == undefined) {
         console.error(`请先初始化kvStore`);
-        reject(new Error("请先初始化kvStore"))
+        resolve("")
       } else {
         this.kvStore.get(key, (err, data) => {
           if (err != undefined) {

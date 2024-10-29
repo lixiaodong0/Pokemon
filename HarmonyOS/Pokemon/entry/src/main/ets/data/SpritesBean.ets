@@ -10,7 +10,7 @@ class OtherSpritesBean {
   officialArtwork?: OfficialArtwork
 }
 
-class OfficialArtwork {
-  frontDefault?: string
-  frontShiny?: string
+export class OfficialArtwork {
+  front_default?: string
+  front_shiny?: string
 }
