@@ -28,6 +28,7 @@ struct PokemonIndexScreen {
   @State currentIndex: number = 0
   @State currentAvatar: string = ""
   @State totalCount: number = 0
+  scroller: Scroller = new Scroller()
   preloadCount = 5
   loadingState: boolean = false
   private pokemonIndexViewModel: PokemonIndexViewModel = new PokemonIndexViewModel()
@@ -74,6 +75,7 @@ struct PokemonIndexScreen {
 
       this.currentIndex = newIndex
       this.currentAvatar = newAvatar
+      this.scroller.scrollToIndex(newIndex)
     } catch (e) {
       console.error(e)
     }
@@ -86,6 +88,7 @@ struct PokemonIndexScreen {
 
       this.currentIndex = newIndex
       this.currentAvatar = newAvatar
+      this.scroller.scrollToIndex(newIndex)
     } catch (e) {
       console.error(e)
     }
@@ -104,7 +107,7 @@ struct PokemonIndexScreen {
           .height("100%")
           .layoutWeight(1)
 
-          List({space:12}) {
+          List({ space: 12, scroller: this.scroller }) {
             ForEach(this.pokemonIndexList, (item: PokemonIndexBean, index: number) => {
               ListItem() {
                 PokemonIndexItem({ data: item, selected: index == this.currentIndex }).onClick(() => {
